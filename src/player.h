@@ -5,6 +5,7 @@
 
 #include "bullet.h"
 #include "common.h"
+#include "map.h"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -34,7 +35,7 @@ struct Player {
     pos.y = 0.f;
   }
 
-  void update(Vector2 world_offset) {
+  void update(Map const &map) {
     if (IsKeyDown(KEY_UP)) move_to_relative_direction(0.f);
     if (IsKeyDown(KEY_DOWN)) move_to_relative_direction(PI);
 
@@ -52,14 +53,14 @@ struct Player {
     }
 
     bullets.erase(std::remove_if(bullets.begin(), bullets.end(),
-                                 [&world_offset](const auto &e) { return e.is_dead(world_offset); }),
+                                 [&map](const auto &e) { return e.is_dead(map.world_offset); }),
                   bullets.end());
 
     for (auto &bullet : bullets) bullet.update();
   }
 
-  void draw(Vector2 world_offset) const {
-    Vector2 pos = screen_relative_center(world_offset);
+  void draw(Map const &map) const {
+    Vector2 pos = screen_relative_center(map.world_offset);
     DrawTexturePro(
             player_body_texture,
             {0.f, 0.f, (float) player_body_texture.width, (float) player_body_texture.height},
@@ -68,7 +69,7 @@ struct Player {
             angle,
             WHITE);
 
-    for (auto const &bullet : bullets) bullet.draw(world_offset);
+    for (auto const &bullet : bullets) bullet.draw(map.world_offset);
   }
 
   Vector2 screen_relative_center(Vector2 world_offset) const {
