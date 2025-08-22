@@ -35,21 +35,27 @@ struct Player {
   }
 
   void update(Vector2 world_offset) {
-    if (IsKeyDown(KEY_W)) move_to_relative_direction(0.f);
-    if (IsKeyDown(KEY_S)) move_to_relative_direction(PI);
+    if (IsKeyDown(KEY_UP)) move_to_relative_direction(0.f);
+    if (IsKeyDown(KEY_DOWN)) move_to_relative_direction(PI);
+
     if (IsKeyDown(KEY_A)) move_to_relative_direction(-PI / 2.f);
     if (IsKeyDown(KEY_D)) move_to_relative_direction(PI / 2.f);
 
     if (IsKeyDown(KEY_LEFT)) angle -= PLAYER_ANGLE_SPEED * GetFrameTime();
     if (IsKeyDown(KEY_RIGHT)) angle += PLAYER_ANGLE_SPEED * GetFrameTime();
 
-    if (IsKeyDown(KEY_LEFT_CONTROL)) {
-      // bullets.emplace_back({screen_relative_center(world_offset), })
+    if (IsKeyPressed(KEY_LEFT_CONTROL)) {
+      float bullet_angle = angle * DEG2RAD - PI / 2.f;
+      Vector2 bullet_v{cosf(bullet_angle) * BULLET_SPEED * GetFrameTime(),
+                       sinf(bullet_angle) * BULLET_SPEED * GetFrameTime()};
+      bullets.emplace_back(pos, bullet_v);
     }
 
     bullets.erase(std::remove_if(bullets.begin(), bullets.end(),
-                                 [](const auto &e) { return e.is_dead(); }),
+                                 [&world_offset](const auto &e) { return e.is_dead(world_offset); }),
                   bullets.end());
+
+    for (auto &bullet : bullets) bullet.update();
   }
 
   void draw(Vector2 world_offset) const {
@@ -62,9 +68,7 @@ struct Player {
             angle,
             WHITE);
 
-    for (const auto &bullet : bullets) {
-      bullet.draw(world_offset);
-    }
+    for (auto const &bullet : bullets) bullet.draw(world_offset);
   }
 
   Vector2 screen_relative_center(Vector2 world_offset) const {

@@ -10,7 +10,7 @@ const int WINDOW_H = 1000;
 
 #define WORLD_PLAYER_MIDZONE_MARGIN_PERCENTAGE 0.3f
 
-#define BULLET_SPEED 500.f
+#define BULLET_SPEED 800.f
 
 struct int_point {
   int_t x;

@@ -10,8 +10,8 @@ struct Bullet {
   Bullet(Vector2 pos, Vector2 v) : pos(pos), v(v) {
   }
 
-  void draw(Vector2 world_offset) const {
-    DrawCircleV(Vector2Add(pos, world_offset), 4.f, DARKGREEN);
+  void draw(Vector2 const &world_offset) const {
+    DrawCircleV(get_rel_pos(world_offset), 4.f, DARKGREEN);
   }
 
   void update() {
@@ -19,7 +19,12 @@ struct Bullet {
     pos.y += v.y;
   }
 
-  bool is_dead() const {
-    return pos.x < 0.f || pos.y < 0.f || pos.x > GetScreenWidth() || pos.y > GetScreenHeight();
+  Vector2 get_rel_pos(Vector2 const &world_offset) const {
+    return Vector2Add(pos, world_offset);
+  }
+
+  bool is_dead(Vector2 const &world_offset) const {
+    Vector2 rel_pos = get_rel_pos(world_offset);
+    return rel_pos.x < 0.f || rel_pos.y < 0.f || rel_pos.x > GetScreenWidth() || rel_pos.y > GetScreenHeight();
   }
 };
