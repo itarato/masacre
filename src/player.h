@@ -48,22 +48,18 @@ struct Player {
       bullets.emplace_back(pos, bullet_v);
     }
 
-    bullets.erase(std::remove_if(bullets.begin(), bullets.end(),
-                                 [&map](const auto &e) { return e.is_dead(map.world_offset); }),
-                  bullets.end());
+    bullets.erase(
+        std::remove_if(bullets.begin(), bullets.end(), [&map](const auto &e) { return e.is_dead(map.world_offset); }),
+        bullets.end());
 
     for (auto &bullet : bullets) bullet.update();
   }
 
   void draw(Map const &map) const {
     Vector2 rel_pos = screen_relative_center(map.world_offset);
-    DrawTexturePro(
-            player_body_texture,
-            {0.f, 0.f, (float) player_body_texture.width, (float) player_body_texture.height},
-            {rel_pos.x, rel_pos.y, (float) player_body_texture.width, (float) player_body_texture.height},
-            Vector2Divide(frame, {2.f, 2.f}),
-            angle,
-            WHITE);
+    DrawTexturePro(player_body_texture, {0.f, 0.f, (float)player_body_texture.width, (float)player_body_texture.height},
+                   {rel_pos.x, rel_pos.y, (float)player_body_texture.width, (float)player_body_texture.height},
+                   Vector2Divide(frame, {2.f, 2.f}), angle, WHITE);
 
     for (auto const &bullet : bullets) bullet.draw(map.world_offset);
 
@@ -80,29 +76,23 @@ struct Player {
     if (IsKeyDown(KEY_A)) move_to_relative_direction(-PI / 2.f);
     if (IsKeyDown(KEY_D)) move_to_relative_direction(PI / 2.f);
 
-    Vector2 mp = Vector2Subtract(GetMousePosition(), old_pos);
-    TraceLog(LOG_INFO, TextFormat("Real: %.2f Mouse: %.2f %.2f:%.2f", angle, Vector2Angle({0.f, 0.f}, mp), mp.x, mp.y));
-
-    if (map.is_hit(pos)) {
-      Vector2 new_pos_angle_adjusted = Vector2Subtract(pos, old_pos);
-      float move_angle = Vector2Angle({0.f, 0.f}, new_pos_angle_adjusted);
+    if (!Vector2Equals(pos, old_pos) && map.is_hit(pos)) {
+      float move_angle_rad = abs_angle_of_points(old_pos, pos);
 
       float dist = Vector2Distance(old_pos, pos);
-      TraceLog(LOG_INFO, "Ang: %.2f Dist: %.2f", move_angle, dist);
-
-      float angle_left_attempt = move_angle * DEG2RAD - PI / 4.f;
-      Vector2 left_attempt = point_move_with_angle_and_distance(old_pos, angle_left_attempt, dist);
+      float angle_left_attempt = move_angle_rad - PLAYER_WALL_COLLIDE_ANGLE_ADJUST;
+      Vector2 left_attempt = point_move_with_angle_and_distance(old_pos, angle_left_attempt - PI / 2.f,
+                                                                dist * PLAYER_WALL_COLLIDE_DISTANCE_ADJUST);
       if (!map.is_hit(left_attempt)) {
         pos = left_attempt;
-        angle = angle_left_attempt;
         return;
       }
 
-      float angle_right_attempt = move_angle * DEG2RAD + PI / 4.f;
-      Vector2 right_attempt = point_move_with_angle_and_distance(old_pos, angle_right_attempt, dist);
+      float angle_right_attempt = move_angle_rad + PLAYER_WALL_COLLIDE_ANGLE_ADJUST;
+      Vector2 right_attempt = point_move_with_angle_and_distance(old_pos, angle_right_attempt - PI / 2.f,
+                                                                 dist * PLAYER_WALL_COLLIDE_DISTANCE_ADJUST);
       if (!map.is_hit(right_attempt)) {
         pos = right_attempt;
-        angle = angle_right_attempt;
         return;
       }
 

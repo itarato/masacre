@@ -7,7 +7,7 @@ struct Bullet {
   Vector2 pos{};
   Vector2 v{};
 
-  Bullet(Vector2 pos, Vector2 v) : pos(pos), v(v) {
+  Bullet(Vector2 _pos, Vector2 _v) : pos(_pos), v(_v) {
   }
 
   void draw(Vector2 const &world_offset) const {
