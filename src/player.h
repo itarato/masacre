@@ -42,9 +42,9 @@ struct Player {
     if (IsKeyDown(KEY_RIGHT)) angle += PLAYER_ANGLE_SPEED * GetFrameTime();
 
     if (IsKeyPressed(KEY_LEFT_CONTROL)) {
-      float bullet_angle = angle * DEG2RAD - PI / 2.f;
-      Vector2 bullet_v{cosf(bullet_angle) * BULLET_SPEED * GetFrameTime(),
-                       sinf(bullet_angle) * BULLET_SPEED * GetFrameTime()};
+      float bullet_angle_rad = angle * DEG2RAD;
+      Vector2 bullet_v{cosf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime(),
+                       sinf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime()};
       bullets.emplace_back(pos, bullet_v);
     }
 
@@ -81,16 +81,16 @@ struct Player {
 
       float dist = Vector2Distance(old_pos, pos);
       float angle_left_attempt = move_angle_rad - PLAYER_WALL_COLLIDE_ANGLE_ADJUST;
-      Vector2 left_attempt = point_move_with_angle_and_distance(old_pos, angle_left_attempt - PI / 2.f,
-                                                                dist * PLAYER_WALL_COLLIDE_DISTANCE_ADJUST);
+      Vector2 left_attempt =
+          point_move_with_angle_and_distance(old_pos, angle_left_attempt, dist * PLAYER_WALL_COLLIDE_DISTANCE_ADJUST);
       if (!map.is_hit(left_attempt)) {
         pos = left_attempt;
         return;
       }
 
       float angle_right_attempt = move_angle_rad + PLAYER_WALL_COLLIDE_ANGLE_ADJUST;
-      Vector2 right_attempt = point_move_with_angle_and_distance(old_pos, angle_right_attempt - PI / 2.f,
-                                                                 dist * PLAYER_WALL_COLLIDE_DISTANCE_ADJUST);
+      Vector2 right_attempt =
+          point_move_with_angle_and_distance(old_pos, angle_right_attempt, dist * PLAYER_WALL_COLLIDE_DISTANCE_ADJUST);
       if (!map.is_hit(right_attempt)) {
         pos = right_attempt;
         return;
@@ -105,7 +105,7 @@ struct Player {
   }
 
   void move_to_relative_direction(float rel_rad_angle) {
-    float abs_angle = (angle * DEG2RAD) + rel_rad_angle - PI / 2.f;
+    float abs_angle = (angle * DEG2RAD) + rel_rad_angle;
     pos.x += cosf(abs_angle) * PLAYER_SPEED * GetFrameTime();
     pos.y += sinf(abs_angle) * PLAYER_SPEED * GetFrameTime();
   }

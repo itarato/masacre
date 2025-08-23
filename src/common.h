@@ -30,5 +30,5 @@ Vector2 point_move_with_angle_and_distance(Vector2 p, float angle_rad, float dis
 
 float abs_angle_of_points(Vector2 const &lhs, Vector2 const &rhs) {
   Vector2 rhs_adjusted = Vector2Subtract(rhs, lhs);
-  return Vector2Angle({0.f, -5.f}, rhs_adjusted);
+  return Vector2Angle({5.f, 0.f}, rhs_adjusted);
 }
