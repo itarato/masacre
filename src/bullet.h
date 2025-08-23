@@ -6,6 +6,7 @@
 struct Bullet {
   Vector2 pos{};
   Vector2 v{};
+  bool is_dead{false};
 
   Bullet(Vector2 _pos, Vector2 _v) : pos(_pos), v(_v) {
   }
@@ -14,9 +15,13 @@ struct Bullet {
     DrawCircleV(get_rel_pos(world_offset), 4.f, DARKGREEN);
   }
 
-  void update() {
+  void update(Map const &map) {
     pos.x += v.x;
     pos.y += v.y;
+
+    if (map.is_hit(pos)) {
+      is_dead = true;
+    }
   }
 
   Vector2 get_rel_pos(Vector2 const &world_offset) const {

@@ -29,7 +29,7 @@ struct Player {
 
   void reset() {
     frame = Vector2(player_body_texture.width, player_body_texture.height);
-    angle = 270.f;
+    angle = 270.f;  // Up.
     bullets.clear();
     pos.x = 0.f;
     pos.y = 0.f;
@@ -52,7 +52,7 @@ struct Player {
         std::remove_if(bullets.begin(), bullets.end(), [&map](const auto &e) { return e.is_dead(map.world_offset); }),
         bullets.end());
 
-    for (auto &bullet : bullets) bullet.update();
+    for (auto &bullet : bullets) bullet.update(map);
   }
 
   void draw(Map const &map) const {
