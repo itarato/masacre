@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.h"
+#include "path_finder.h"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -8,8 +9,10 @@ struct Map {
   Vector2 world_offset{};
   Texture2D map_texture;
   Image map_image;
+  PathFinder path_finder;
 
-  Map() {}
+  Map() {
+  }
   ~Map() {
     UnloadTexture(map_texture);
     UnloadImage(map_image);
@@ -38,8 +41,10 @@ struct Map {
       if (i == 0) {
         color = RED;
       }
-      DrawLine(i * 100 + world_offset.x, -1000 + world_offset.y, i * 100 + world_offset.x, 1000 + world_offset.y, color);
-      DrawLine(-1000 + world_offset.x, i * 100 + world_offset.y, 1000 + world_offset.x, i * 100 + world_offset.y, color);
+      DrawLine(i * 100 + world_offset.x, -1000 + world_offset.y, i * 100 + world_offset.x, 1000 + world_offset.y,
+               color);
+      DrawLine(-1000 + world_offset.x, i * 100 + world_offset.y, 1000 + world_offset.x, i * 100 + world_offset.y,
+               color);
     }
   }
 

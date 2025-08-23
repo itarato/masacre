@@ -1,6 +1,9 @@
 #pragma once
 
+#include <vector>
+
 #include "common.h"
+#include "enemy.h"
 #include "map.h"
 #include "player.h"
 #include "raylib.h"
@@ -8,8 +11,10 @@
 struct App {
   Player player{};
   Map map{};
+  std::vector<Enemy> enemies{};
 
-  App() {}
+  App() {
+  }
   ~App() {
   }
 
@@ -17,7 +22,6 @@ struct App {
     SetConfigFlags(FLAG_WINDOW_HIGHDPI);
     InitWindow(WINDOW_W, WINDOW_H, "Masacre");
     SetTargetFPS(GetMonitorRefreshRate(0));
-
 
     player.init();
     map.init();
@@ -28,6 +32,9 @@ struct App {
   void reset() {
     map.reset();
     player.reset();
+
+    enemies.clear();
+    enemies.emplace_back();
   }
 
   void run() {
@@ -44,11 +51,15 @@ struct App {
 
   void update() {
     player.update(map);
+    for (auto& enemy : enemies) enemy.update();
     map.update(player.pos);
   }
 
   void draw() const {
     map.draw();
+
+    for (auto const& enemy : enemies) enemy.draw();
+
     player.draw(map);
 
     DrawFPS(10, 10);
