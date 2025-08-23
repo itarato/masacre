@@ -29,7 +29,7 @@ struct Player {
 
   void reset() {
     frame = Vector2(player_body_texture.width, player_body_texture.height);
-    angle = 0.f;
+    angle = 270.f;
     bullets.clear();
     pos.x = 0.f;
     pos.y = 0.f;
