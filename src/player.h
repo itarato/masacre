@@ -80,13 +80,17 @@ struct Player {
     if (IsKeyDown(KEY_A)) move_to_relative_direction(-PI / 2.f);
     if (IsKeyDown(KEY_D)) move_to_relative_direction(PI / 2.f);
 
-    if (map.is_hit(pos)) {
-      // Vector2 new_pos_angle_adjusted = Vector2Subtract(pos, old_pos);
-      float angle = Vector2LineAngle(old_pos, pos);
-      float dist = Vector2Distance(old_pos, pos);
-      TraceLog(LOG_INFO, "Ang: %.2f Dist: %.2f", angle, dist);
+    Vector2 mp = Vector2Subtract(GetMousePosition(), old_pos);
+    TraceLog(LOG_INFO, TextFormat("Real: %.2f Mouse: %.2f %.2f:%.2f", angle, Vector2Angle({0.f, 0.f}, mp), mp.x, mp.y));
 
-      float angle_left_attempt = angle * DEG2RAD - PI / 4.f;
+    if (map.is_hit(pos)) {
+      Vector2 new_pos_angle_adjusted = Vector2Subtract(pos, old_pos);
+      float move_angle = Vector2Angle({0.f, 0.f}, new_pos_angle_adjusted);
+
+      float dist = Vector2Distance(old_pos, pos);
+      TraceLog(LOG_INFO, "Ang: %.2f Dist: %.2f", move_angle, dist);
+
+      float angle_left_attempt = move_angle * DEG2RAD - PI / 4.f;
       Vector2 left_attempt = point_move_with_angle_and_distance(old_pos, angle_left_attempt, dist);
       if (!map.is_hit(left_attempt)) {
         pos = left_attempt;
@@ -94,7 +98,7 @@ struct Player {
         return;
       }
 
-      float angle_right_attempt = angle * DEG2RAD + PI / 4.f;
+      float angle_right_attempt = move_angle * DEG2RAD + PI / 4.f;
       Vector2 right_attempt = point_move_with_angle_and_distance(old_pos, angle_right_attempt, dist);
       if (!map.is_hit(right_attempt)) {
         pos = right_attempt;

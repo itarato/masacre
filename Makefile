@@ -8,7 +8,7 @@ ifeq ($(UNAME_S),Darwin)
     LIBS=-lm -lpthread -ldl -framework IOKit -framework Cocoa -framework OpenGL `pkg-config --libs --cflags raylib`
 endif
 
-CXXFLAGS=-std=c++2a -Wall -pedantic -Wformat -Werror
+CXXFLAGS=-std=c++2a -Wall -pedantic -Wformat -Werror -Wshadow
 
 BIN=main
 
