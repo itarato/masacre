@@ -51,8 +51,6 @@ struct App {
     map.draw();
     player.draw(map);
 
-    DrawText(TextFormat("Player: %f:%f", player.pos.x, player.pos.y), 10, 70, 20, ORANGE);
-
     DrawFPS(10, 10);
   }
 };

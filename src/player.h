@@ -36,11 +36,17 @@ struct Player {
   }
 
   void update(Map const &map) {
+    Vector2 old_pos = pos;
+
     if (IsKeyDown(KEY_UP)) move_to_relative_direction(0.f);
     if (IsKeyDown(KEY_DOWN)) move_to_relative_direction(PI);
 
     if (IsKeyDown(KEY_A)) move_to_relative_direction(-PI / 2.f);
     if (IsKeyDown(KEY_D)) move_to_relative_direction(PI / 2.f);
+
+    if (map.is_hit(pos)) {
+      pos = old_pos;
+    }
 
     if (IsKeyDown(KEY_LEFT)) angle -= PLAYER_ANGLE_SPEED * GetFrameTime();
     if (IsKeyDown(KEY_RIGHT)) angle += PLAYER_ANGLE_SPEED * GetFrameTime();
@@ -60,16 +66,19 @@ struct Player {
   }
 
   void draw(Map const &map) const {
-    Vector2 pos = screen_relative_center(map.world_offset);
+    Vector2 rel_pos = screen_relative_center(map.world_offset);
     DrawTexturePro(
             player_body_texture,
             {0.f, 0.f, (float) player_body_texture.width, (float) player_body_texture.height},
-            {pos.x, pos.y, (float) player_body_texture.width, (float) player_body_texture.height},
+            {rel_pos.x, rel_pos.y, (float) player_body_texture.width, (float) player_body_texture.height},
             Vector2Divide(frame, {2.f, 2.f}),
             angle,
             WHITE);
 
     for (auto const &bullet : bullets) bullet.draw(map.world_offset);
+
+    DrawText(TextFormat("Player: %.2f:%.2f", pos.x, pos.y), 10, 70, 20, ORANGE);
+    DrawText(map.is_hit(pos) ? "hit" : "miss", 10, 30, 20, ORANGE);
   }
 
   Vector2 screen_relative_center(Vector2 world_offset) const {

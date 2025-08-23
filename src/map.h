@@ -30,8 +30,8 @@ struct Map {
   }
 
   void draw() const {
-    Vector2 map_corner_pos{-map_texture.width / 2.0f, -map_texture.height / 2.0f};
-    DrawTextureV(map_texture, Vector2Add(map_corner_pos, world_offset), WHITE);
+    Vector2 _map_corner_pos = map_corner_pos();
+    DrawTextureV(map_texture, Vector2Add(_map_corner_pos, world_offset), WHITE);
 
     for (int i = -10; i <= 10; i++) {
       Color color = LIGHTGRAY;
@@ -43,6 +43,9 @@ struct Map {
     }
   }
 
+  Vector2 map_corner_pos() const {
+    return Vector2{-map_texture.width / 2.0f, -map_texture.height / 2.0f};
+  }
 
   void update_world_offset(Vector2 player_pos) {
     Vector2 player_rel_pos = Vector2Add(player_pos, world_offset);
@@ -58,5 +61,11 @@ struct Map {
 
     float margin_bottom{GetScreenHeight() * (1.0f - WORLD_PLAYER_MIDZONE_MARGIN_PERCENTAGE)};
     if (player_rel_pos.y > margin_bottom) world_offset.y += margin_bottom - player_rel_pos.y;
+  }
+
+  bool is_hit(Vector2 point_abs) const {
+    Vector2 point_abs_adjusted = Vector2Subtract(point_abs, map_corner_pos());
+    TraceLog(LOG_INFO, "Col: %d", GetImageColor(map_image, point_abs_adjusted.x, point_abs_adjusted.y).r);
+    return GetImageColor(map_image, point_abs_adjusted.x, point_abs_adjusted.y).r < 255;
   }
 };
