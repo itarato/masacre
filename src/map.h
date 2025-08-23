@@ -9,7 +9,7 @@ struct Map {
   Vector2 world_offset{};
   Texture2D map_texture;
   Image map_image;
-  PathFinder path_finder;
+  PathFinder path_finder{};
 
   Map() {
   }
@@ -21,6 +21,8 @@ struct Map {
   void init() {
     map_texture = LoadTexture("./assets/images/map_0.png");
     map_image = LoadImage("./assets/images/map_0.png");
+
+    path_finder_init();
   }
 
   void reset() {
@@ -46,6 +48,16 @@ struct Map {
       DrawLine(-1000 + world_offset.x, i * 100 + world_offset.y, 1000 + world_offset.x, i * 100 + world_offset.y,
                color);
     }
+
+    TraceLog(LOG_INFO, "H=%d", path_finder.cells_h);
+    for (int y = 0; y <= path_finder.cells_h; y++) {
+      for (int x = 0; x <= path_finder.cells_w; x++) {
+        if (path_finder.cells[y * path_finder.cells_w + x] > 0) {
+          DrawCircle(x * CELL_DISTANCE + world_offset.x + _map_corner_pos.x,
+                     y * CELL_DISTANCE + world_offset.y + _map_corner_pos.y, 6, BROWN);
+        }
+      }
+    }
   }
 
   Vector2 map_corner_pos() const {
@@ -68,9 +80,34 @@ struct Map {
     if (player_rel_pos.y > margin_bottom) world_offset.y += margin_bottom - player_rel_pos.y;
   }
 
-  bool is_hit(Vector2 point_abs) const {
-    Vector2 point_abs_adjusted = Vector2Subtract(point_abs, map_corner_pos());
+  bool is_hit_on_world_coordinate(Vector2 point) const {
+    Vector2 point_abs_adjusted = Vector2Subtract(point, map_corner_pos());
     // TraceLog(LOG_INFO, "Col: %d", GetImageColor(map_image, point_abs_adjusted.x, point_abs_adjusted.y).r);
-    return GetImageColor(map_image, point_abs_adjusted.x, point_abs_adjusted.y).r < 255;
+    return is_hit_on_image_absolute_coordinate(point_abs_adjusted);
+  }
+
+  bool is_hit_on_image_absolute_coordinate(Vector2 point) const {
+    // TraceLog(LOG_INFO, "Col: %d", GetImageColor(map_image, point_abs_adjusted.x, point_abs_adjusted.y).r);
+    return GetImageColor(map_image, point.x, point.y).r < 255;
+  }
+
+  void path_finder_init() {
+    path_finder.cells_w = map_image.width / CELL_DISTANCE;
+    path_finder.cells_h = map_image.height / CELL_DISTANCE;
+
+    if (path_finder.cells_w * path_finder.cells_w >= MAX_GRID_CELLS) {
+      TraceLog(LOG_ERROR, "Map too large");
+      exit(EXIT_FAILURE);
+    }
+
+    for (int y = 0; y <= path_finder.cells_h; y++) {
+      for (int x = 0; x <= path_finder.cells_w; x++) {
+        if (is_hit_on_image_absolute_coordinate(Vector2{(float)(x * CELL_DISTANCE), (float)(y * CELL_DISTANCE)})) {
+          path_finder.cells[y * path_finder.cells_w + x] = 0b0;
+        } else {
+          path_finder.cells[y * path_finder.cells_w + x] = 0b1;
+        }
+      }
+    }
   }
 };

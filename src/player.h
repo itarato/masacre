@@ -63,7 +63,7 @@ struct Player {
     for (auto const &bullet : bullets) bullet.draw(map.world_offset);
 
     DrawText(TextFormat("Player: %.2f:%.2f", pos.x, pos.y), 10, 70, 20, ORANGE);
-    DrawText(map.is_hit(pos) ? "hit" : "miss", 10, 30, 20, ORANGE);
+    DrawText(map.is_hit_on_world_coordinate(pos) ? "hit" : "miss", 10, 30, 20, ORANGE);
   }
 
   void update_movement(Map const &map) {
@@ -75,14 +75,14 @@ struct Player {
     if (IsKeyDown(KEY_A)) move_to_relative_direction(-PI / 2.f);
     if (IsKeyDown(KEY_D)) move_to_relative_direction(PI / 2.f);
 
-    if (!Vector2Equals(pos, old_pos) && map.is_hit(pos)) {
+    if (!Vector2Equals(pos, old_pos) && map.is_hit_on_world_coordinate(pos)) {
       float move_angle_rad = abs_angle_of_points(old_pos, pos);
 
       float dist = Vector2Distance(old_pos, pos);
       float angle_left_attempt = move_angle_rad - PLAYER_WALL_COLLIDE_ANGLE_ADJUST;
       Vector2 left_attempt =
           point_move_with_angle_and_distance(old_pos, angle_left_attempt, dist * PLAYER_WALL_COLLIDE_DISTANCE_ADJUST);
-      if (!map.is_hit(left_attempt)) {
+      if (!map.is_hit_on_world_coordinate(left_attempt)) {
         pos = left_attempt;
         return;
       }
@@ -90,7 +90,7 @@ struct Player {
       float angle_right_attempt = move_angle_rad + PLAYER_WALL_COLLIDE_ANGLE_ADJUST;
       Vector2 right_attempt =
           point_move_with_angle_and_distance(old_pos, angle_right_attempt, dist * PLAYER_WALL_COLLIDE_DISTANCE_ADJUST);
-      if (!map.is_hit(right_attempt)) {
+      if (!map.is_hit_on_world_coordinate(right_attempt)) {
         pos = right_attempt;
         return;
       }
