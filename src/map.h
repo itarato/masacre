@@ -65,7 +65,7 @@ struct Map {
 
   bool is_hit(Vector2 point_abs) const {
     Vector2 point_abs_adjusted = Vector2Subtract(point_abs, map_corner_pos());
-    TraceLog(LOG_INFO, "Col: %d", GetImageColor(map_image, point_abs_adjusted.x, point_abs_adjusted.y).r);
+    // TraceLog(LOG_INFO, "Col: %d", GetImageColor(map_image, point_abs_adjusted.x, point_abs_adjusted.y).r);
     return GetImageColor(map_image, point_abs_adjusted.x, point_abs_adjusted.y).r < 255;
   }
 };

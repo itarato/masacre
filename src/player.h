@@ -36,17 +36,7 @@ struct Player {
   }
 
   void update(Map const &map) {
-    Vector2 old_pos = pos;
-
-    if (IsKeyDown(KEY_UP)) move_to_relative_direction(0.f);
-    if (IsKeyDown(KEY_DOWN)) move_to_relative_direction(PI);
-
-    if (IsKeyDown(KEY_A)) move_to_relative_direction(-PI / 2.f);
-    if (IsKeyDown(KEY_D)) move_to_relative_direction(PI / 2.f);
-
-    if (map.is_hit(pos)) {
-      pos = old_pos;
-    }
+    update_movement(map);
 
     if (IsKeyDown(KEY_LEFT)) angle -= PLAYER_ANGLE_SPEED * GetFrameTime();
     if (IsKeyDown(KEY_RIGHT)) angle += PLAYER_ANGLE_SPEED * GetFrameTime();
@@ -79,6 +69,41 @@ struct Player {
 
     DrawText(TextFormat("Player: %.2f:%.2f", pos.x, pos.y), 10, 70, 20, ORANGE);
     DrawText(map.is_hit(pos) ? "hit" : "miss", 10, 30, 20, ORANGE);
+  }
+
+  void update_movement(Map const &map) {
+    Vector2 old_pos = pos;
+
+    if (IsKeyDown(KEY_UP)) move_to_relative_direction(0.f);
+    if (IsKeyDown(KEY_DOWN)) move_to_relative_direction(PI);
+
+    if (IsKeyDown(KEY_A)) move_to_relative_direction(-PI / 2.f);
+    if (IsKeyDown(KEY_D)) move_to_relative_direction(PI / 2.f);
+
+    if (map.is_hit(pos)) {
+      // Vector2 new_pos_angle_adjusted = Vector2Subtract(pos, old_pos);
+      float angle = Vector2LineAngle(old_pos, pos);
+      float dist = Vector2Distance(old_pos, pos);
+      TraceLog(LOG_INFO, "Ang: %.2f Dist: %.2f", angle, dist);
+
+      float angle_left_attempt = angle * DEG2RAD - PI / 4.f;
+      Vector2 left_attempt = point_move_with_angle_and_distance(old_pos, angle_left_attempt, dist);
+      if (!map.is_hit(left_attempt)) {
+        pos = left_attempt;
+        angle = angle_left_attempt;
+        return;
+      }
+
+      float angle_right_attempt = angle * DEG2RAD + PI / 4.f;
+      Vector2 right_attempt = point_move_with_angle_and_distance(old_pos, angle_right_attempt, dist);
+      if (!map.is_hit(right_attempt)) {
+        pos = right_attempt;
+        angle = angle_right_attempt;
+        return;
+      }
+
+      pos = old_pos;
+    }
   }
 
   Vector2 screen_relative_center(Vector2 world_offset) const {
