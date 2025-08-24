@@ -19,6 +19,10 @@
 
 #define PF_CELL_ACCESSIBLE_FLAG 0b1
 
+static int8_t NEIGHBOR_MAP[8][2]{
+    {-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1},
+};
+
 struct PathFinder {
   u_int8_t cells[MAX_GRID_CELLS]{};
   int cells_w{};
@@ -29,30 +33,30 @@ struct PathFinder {
   ~PathFinder() {
   }
 
-  void find_path(Vector2 start, Vector2 end) const {
+  std::vector<IntVector2> find_path(Vector2 start, Vector2 end) const {
     IntVector2 start_normalized = cell_idx_from_coord(start);
     IntVector2 end_normalized = cell_idx_from_coord(end);
     return find_path(start_normalized, end_normalized);
   }
 
-  void find_path(IntVector2 start, IntVector2 end) const {
-    static int8_t neighbor_map[8][2]{
-        {-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1},
-    };
-
+  std::vector<IntVector2> find_path(IntVector2 start, IntVector2 end) const {
     if (is_out_of_bounds(start)) {
       TraceLog(LOG_ERROR, "Out of bound start for path finder: %d:%d.", start.x, start.y);
-      return;
+      return {};
     }
 
     if (is_out_of_bounds(end)) {
       TraceLog(LOG_ERROR, "Out of bound end for path finder: %d:%d.", end.x, end.y);
-      return;
+      return {};
     }
 
     std::vector<PFCell> queue{};
     queue.emplace_back(0.f, heuristic_distance(start, end), start);
 
+    // Visited byte setup:
+    //        ┌ source (index of neighbour_map)
+    //        |  ┌ visited (1: yes, 0: no)
+    // 0bxxxx_bbba
     u_int8_t visited_cells[MAX_GRID_CELLS]{};
     visited_cells[PF_CELL_IDX(start.x, start.y)] |= PF_CELL_FLAG_VISITED;
 
@@ -67,10 +71,11 @@ struct PathFinder {
 
       if (min_cell.p == end) {
         TraceLog(LOG_DEBUG, "Found path");
-        return;
+        return backtrack_path(visited_cells, start, end);
       }
 
-      for (auto &neighbor_offs : neighbor_map) {
+      for (u_int8_t i = 0; i < 8; i++) {
+        auto neighbor_offs = NEIGHBOR_MAP[i];
         IntVector2 neighbor_coord{min_cell.p.x + neighbor_offs[0], min_cell.p.y + neighbor_offs[1]};
 
         // Out of bounds.
@@ -87,11 +92,13 @@ struct PathFinder {
 
         TraceLog(LOG_DEBUG, "- pushed: %d:%d", neighbor_coord.x, neighbor_coord.y);
 
-        visited_cells[PF_CELL_IDX(neighbor_coord.x, neighbor_coord.y)] |= PF_CELL_FLAG_VISITED;
+        u_int8_t visited_bits = PF_CELL_FLAG_VISITED | ((i & 0b111) << 1);
+        visited_cells[PF_CELL_IDX(neighbor_coord.x, neighbor_coord.y)] = visited_bits;
       }
     }
 
     TraceLog(LOG_WARNING, "Did not find a path for %d:%d -> %d:%d", start.x, start.y, end.x, end.y);
+    return {};
   }
 
   float heuristic_distance(IntVector2 lhs, IntVector2 rhs) const {
@@ -110,5 +117,24 @@ struct PathFinder {
 
   bool is_accessible(IntVector2 const &p) const {
     return (cells[PF_CELL_IDX(p.x, p.y)] & PF_CELL_ACCESSIBLE_FLAG) > 0;
+  }
+
+  std::vector<IntVector2> backtrack_path(u_int8_t *visited_cells, IntVector2 const &start,
+                                         IntVector2 const &end) const {
+    std::vector<IntVector2> out{};
+    IntVector2 current_coord = end;
+
+    out.push_back(end);
+
+    while (current_coord != start) {
+      u_int8_t origin_index = (visited_cells[PF_CELL_IDX(current_coord.x, current_coord.y)] >> 1) & 0b111;
+      auto origin_offset = NEIGHBOR_MAP[origin_index];
+      current_coord.x -= origin_offset[0];
+      current_coord.y -= origin_offset[1];
+
+      out.push_back(current_coord);
+    }
+
+    return out;
   }
 };

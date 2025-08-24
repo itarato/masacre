@@ -6,6 +6,8 @@
 using namespace std;
 
 int main() {
+  SetTraceLogLevel(LOG_DEBUG);
+
   PathFinder pf{};
   pf.cells_w = 3;
   pf.cells_h = 3;
@@ -34,5 +36,8 @@ int main() {
   // . X X .
   // . . . .
 
-  pf.find_path(IntVector2{0, 0}, IntVector2{3, 3});
+  auto path = pf.find_path(IntVector2{0, 0}, IntVector2{3, 3});
+  for (auto& coord : path) {
+    cou
+  }
 }
