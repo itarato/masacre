@@ -62,11 +62,11 @@ struct PathFinder {
       PFCell min_cell = queue.back();
       queue.pop_back();
 
-      TraceLog(LOG_INFO, "Min cell: %d:%d G=%.2f H=%.2f F=%.2f", min_cell.p.x, min_cell.p.y, min_cell.prefix,
+      TraceLog(LOG_DEBUG, "Min cell: %d:%d G=%.2f H=%.2f F=%.2f", min_cell.p.x, min_cell.p.y, min_cell.prefix,
                min_cell.suffix, min_cell.total());
 
       if (min_cell.p == end) {
-        TraceLog(LOG_INFO, "Found path");
+        TraceLog(LOG_DEBUG, "Found path");
         return;
       }
 
@@ -85,7 +85,7 @@ struct PathFinder {
                            neighbor_coord);
         std::push_heap(queue.begin(), queue.end(), std::greater{});
 
-        TraceLog(LOG_INFO, "- pushed: %d:%d", neighbor_coord.x, neighbor_coord.y);
+        TraceLog(LOG_DEBUG, "- pushed: %d:%d", neighbor_coord.x, neighbor_coord.y);
 
         visited_cells[PF_CELL_IDX(neighbor_coord.x, neighbor_coord.y)] |= PF_CELL_FLAG_VISITED;
       }
