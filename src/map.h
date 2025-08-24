@@ -35,7 +35,7 @@ struct Map {
   void update(Vector2 player_pos) {
     update_world_offset(player_pos);
 
-    // path_finder.find_path(player_pos, GetMousePosition());
+    path_finder.find_path(player_pos, Vector2Add(GetMousePosition(), world_offset));
   }
 
   void draw() const {
