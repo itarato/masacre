@@ -33,6 +33,10 @@ int mod_reduce(float v, int mod) {
 struct IntVector2 {
   int x{};
   int y{};
+
+  bool operator==(const IntVector2 &other) const {
+    return x == other.x && y == other.y;
+  }
 };
 
 struct PFCell {

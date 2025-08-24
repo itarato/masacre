@@ -32,6 +32,8 @@ struct Map {
 
   void update(Vector2 player_pos) {
     update_world_offset(player_pos);
+
+    path_finder.find_path(player_pos, GetMousePosition());
   }
 
   void draw() const {
@@ -49,7 +51,6 @@ struct Map {
                color);
     }
 
-    TraceLog(LOG_INFO, "H=%d", path_finder.cells_h);
     for (int y = 0; y <= path_finder.cells_h; y++) {
       for (int x = 0; x <= path_finder.cells_w; x++) {
         if (path_finder.cells[y * path_finder.cells_w + x] > 0) {
