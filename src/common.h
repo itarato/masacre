@@ -25,3 +25,29 @@ float abs_angle_of_points(Vector2 const &lhs, Vector2 const &rhs) {
   Vector2 rhs_adjusted = Vector2Subtract(rhs, lhs);
   return Vector2Angle({5.f, 0.f}, rhs_adjusted);
 }
+
+int mod_reduce(float v, int mod) {
+  return (int)(v - ((int)v % mod));
+}
+
+struct IntVector2 {
+  int x{};
+  int y{};
+};
+
+struct PFCell {
+  float prefix{};  // G
+  float suffix{};  // H
+  IntVector2 p{};
+
+  PFCell(float _prefix, float _suffix, IntVector2 _p) : prefix(_prefix), suffix(_suffix), p(_p) {
+  }
+
+  float total() const {
+    return prefix + suffix;
+  }
+
+  bool operator>(const PFCell &other) const {
+    return total() > other.total();
+  }
+};
