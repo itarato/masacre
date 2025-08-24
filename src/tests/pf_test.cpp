@@ -36,8 +36,9 @@ int main() {
   // . X X .
   // . . . .
 
+  cout << "Path:\n";
   auto path = pf.find_path(IntVector2{0, 0}, IntVector2{3, 3});
   for (auto& coord : path) {
-    cou
+    cout << coord.x << ":" << coord.y << endl;
   }
 }

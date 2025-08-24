@@ -32,13 +32,11 @@ struct Map {
     world_offset.y = -(map_image.height - GetScreenHeight()) / 2.f;
   }
 
-  void update(Vector2 player_pos) {
+  void update(Vector2 const& player_pos) {
     update_world_offset(player_pos);
-
-    path_finder.find_path(player_pos, Vector2Subtract(GetMousePosition(), world_offset));
   }
 
-  void draw() const {
+  void draw(Vector2 const& player_pos) const {
     DrawTextureV(map_texture, world_offset, WHITE);
 
     // for (int i = -10; i <= 10; i++) {
@@ -58,6 +56,11 @@ struct Map {
           DrawCircle(x * CELL_DISTANCE + world_offset.x, y * CELL_DISTANCE + world_offset.y, 6, BROWN);
         }
       }
+    }
+
+    auto path = path_finder.find_path(player_pos, Vector2Subtract(GetMousePosition(), world_offset));
+    for (auto& coord : path) {
+      DrawCircle(coord.x * CELL_DISTANCE + world_offset.x, coord.y * CELL_DISTANCE + world_offset.y, 8, MAGENTA);
     }
   }
 

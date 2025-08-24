@@ -39,10 +39,11 @@ struct App {
 
   void run() {
     while (!WindowShouldClose()) {
+      update();
+
       BeginDrawing();
       ClearBackground(RAYWHITE);
 
-      update();
       draw();
 
       EndDrawing();
@@ -56,7 +57,7 @@ struct App {
   }
 
   void draw() const {
-    map.draw();
+    map.draw(player.pos);
 
     for (auto const& enemy : enemies) enemy.draw();
 
