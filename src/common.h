@@ -17,18 +17,7 @@ const int WINDOW_H = 1000;
 
 #define BULLET_SPEED 800.f
 
-Vector2 point_move_with_angle_and_distance(Vector2 p, float angle_rad, float dist) {
-  return Vector2{p.x + cosf(angle_rad) * dist, p.y + sinf(angle_rad) * dist};
-}
-
-float abs_angle_of_points(Vector2 const &lhs, Vector2 const &rhs) {
-  Vector2 rhs_adjusted = Vector2Subtract(rhs, lhs);
-  return Vector2Angle({5.f, 0.f}, rhs_adjusted);
-}
-
-int mod_reduce(float v, int mod) {
-  return (int)(v - ((int)v % mod));
-}
+#define CELL_DISTANCE 50
 
 struct IntVector2 {
   int x{};
@@ -55,3 +44,16 @@ struct PFCell {
     return total() > other.total();
   }
 };
+
+Vector2 point_move_with_angle_and_distance(Vector2 p, float angle_rad, float dist) {
+  return Vector2{p.x + cosf(angle_rad) * dist, p.y + sinf(angle_rad) * dist};
+}
+
+float abs_angle_of_points(Vector2 const &lhs, Vector2 const &rhs) {
+  Vector2 rhs_adjusted = Vector2Subtract(rhs, lhs);
+  return Vector2Angle({5.f, 0.f}, rhs_adjusted);
+}
+
+IntVector2 cell_idx_from_coord(Vector2 const &p) {
+  return IntVector2{(int)roundf(p.x / CELL_DISTANCE), (int)roundf(p.y / CELL_DISTANCE)};
+}

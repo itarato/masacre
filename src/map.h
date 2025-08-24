@@ -35,7 +35,7 @@ struct Map {
   void update(Vector2 player_pos) {
     update_world_offset(player_pos);
 
-    path_finder.find_path(player_pos, Vector2Add(GetMousePosition(), world_offset));
+    path_finder.find_path(player_pos, Vector2Subtract(GetMousePosition(), world_offset));
   }
 
   void draw() const {
@@ -94,9 +94,9 @@ struct Map {
     for (int y = 0; y <= path_finder.cells_h; y++) {
       for (int x = 0; x <= path_finder.cells_w; x++) {
         if (is_hit(Vector2{(float)(x * CELL_DISTANCE), (float)(y * CELL_DISTANCE)})) {
-          path_finder.cells[y * path_finder.cells_w + x] = 0b0;
+          path_finder.cells[y * path_finder.cells_w + x] = 0;
         } else {
-          path_finder.cells[y * path_finder.cells_w + x] = 0b1;
+          path_finder.cells[y * path_finder.cells_w + x] = PF_CELL_ACCESSIBLE_FLAG;
         }
       }
     }
