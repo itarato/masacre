@@ -59,7 +59,7 @@ struct App {
   void draw() const {
     map.draw(player.pos);
 
-    for (auto const& enemy : enemies) enemy.draw();
+    for (auto const& enemy : enemies) enemy.draw(map);
 
     player.draw(map);
 
