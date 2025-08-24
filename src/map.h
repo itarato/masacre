@@ -23,46 +23,42 @@ struct Map {
     map_image = LoadImage("./assets/images/map_0.png");
 
     path_finder_init();
+
+    reset();
   }
 
   void reset() {
-    world_offset.x = GetScreenWidth() / 2;
-    world_offset.y = GetScreenHeight() / 2;
+    world_offset.x = -(map_image.width - GetScreenWidth()) / 2.f;
+    world_offset.y = -(map_image.height - GetScreenHeight()) / 2.f;
   }
 
   void update(Vector2 player_pos) {
     update_world_offset(player_pos);
 
-    path_finder.find_path(player_pos, GetMousePosition());
+    // path_finder.find_path(player_pos, GetMousePosition());
   }
 
   void draw() const {
-    Vector2 _map_corner_pos = map_corner_pos();
-    DrawTextureV(map_texture, Vector2Add(_map_corner_pos, world_offset), WHITE);
+    DrawTextureV(map_texture, world_offset, WHITE);
 
-    for (int i = -10; i <= 10; i++) {
-      Color color = LIGHTGRAY;
-      if (i == 0) {
-        color = RED;
-      }
-      DrawLine(i * 100 + world_offset.x, -1000 + world_offset.y, i * 100 + world_offset.x, 1000 + world_offset.y,
-               color);
-      DrawLine(-1000 + world_offset.x, i * 100 + world_offset.y, 1000 + world_offset.x, i * 100 + world_offset.y,
-               color);
-    }
+    // for (int i = -10; i <= 10; i++) {
+    //   Color color = LIGHTGRAY;
+    //   if (i == 0) {
+    //     color = RED;
+    //   }
+    //   DrawLine(i * 100 + world_offset.x, -1000 + world_offset.y, i * 100 + world_offset.x, 1000 + world_offset.y,
+    //            color);
+    //   DrawLine(-1000 + world_offset.x, i * 100 + world_offset.y, 1000 + world_offset.x, i * 100 + world_offset.y,
+    //            color);
+    // }
 
     for (int y = 0; y <= path_finder.cells_h; y++) {
       for (int x = 0; x <= path_finder.cells_w; x++) {
         if (path_finder.cells[y * path_finder.cells_w + x] > 0) {
-          DrawCircle(x * CELL_DISTANCE + world_offset.x + _map_corner_pos.x,
-                     y * CELL_DISTANCE + world_offset.y + _map_corner_pos.y, 6, BROWN);
+          DrawCircle(x * CELL_DISTANCE + world_offset.x, y * CELL_DISTANCE + world_offset.y, 6, BROWN);
         }
       }
     }
-  }
-
-  Vector2 map_corner_pos() const {
-    return Vector2{-map_texture.width / 2.0f, -map_texture.height / 2.0f};
   }
 
   void update_world_offset(Vector2 player_pos) {
@@ -81,13 +77,7 @@ struct Map {
     if (player_rel_pos.y > margin_bottom) world_offset.y += margin_bottom - player_rel_pos.y;
   }
 
-  bool is_hit_on_world_coordinate(Vector2 point) const {
-    Vector2 point_abs_adjusted = Vector2Subtract(point, map_corner_pos());
-    // TraceLog(LOG_INFO, "Col: %d", GetImageColor(map_image, point_abs_adjusted.x, point_abs_adjusted.y).r);
-    return is_hit_on_image_absolute_coordinate(point_abs_adjusted);
-  }
-
-  bool is_hit_on_image_absolute_coordinate(Vector2 point) const {
+  bool is_hit(Vector2 point) const {
     // TraceLog(LOG_INFO, "Col: %d", GetImageColor(map_image, point_abs_adjusted.x, point_abs_adjusted.y).r);
     return GetImageColor(map_image, point.x, point.y).r < 255;
   }
@@ -103,7 +93,7 @@ struct Map {
 
     for (int y = 0; y <= path_finder.cells_h; y++) {
       for (int x = 0; x <= path_finder.cells_w; x++) {
-        if (is_hit_on_image_absolute_coordinate(Vector2{(float)(x * CELL_DISTANCE), (float)(y * CELL_DISTANCE)})) {
+        if (is_hit(Vector2{(float)(x * CELL_DISTANCE), (float)(y * CELL_DISTANCE)})) {
           path_finder.cells[y * path_finder.cells_w + x] = 0b0;
         } else {
           path_finder.cells[y * path_finder.cells_w + x] = 0b1;

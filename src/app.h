@@ -31,7 +31,7 @@ struct App {
 
   void reset() {
     map.reset();
-    player.reset();
+    player.reset(map);
 
     enemies.clear();
     enemies.emplace_back();

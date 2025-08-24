@@ -20,7 +20,7 @@ struct Bullet {
     pos.y += v.y;
 
     if (!is_dead) {
-      if (map.is_hit_on_world_coordinate(pos)) {
+      if (map.is_hit(pos)) {
         is_dead = true;
       } else {
         Vector2 rel_pos = get_rel_pos(map.world_offset);
