@@ -37,7 +37,6 @@ struct App {
   void reset() {
     map.reset();
     player.reset(map);
-
     enemies.clear();
   }
 
@@ -55,6 +54,8 @@ struct App {
   }
 
   void update() {
+    if (IsKeyPressed(KEY_R)) reset();
+
     player.update(map);
     for (auto& enemy : enemies) enemy.update(player.pos, map);
     map.update(player.pos);

@@ -15,6 +15,7 @@ struct Player {
   float angle;
   Texture2D player_body_texture;
   std::vector<Bullet> bullets{};
+  unsigned int bullet_count{};
 
   Player() {
   }
@@ -33,6 +34,7 @@ struct Player {
     bullets.clear();
     pos.x = map.map_image.width / 2.f;
     pos.y = map.map_image.height / 2.f;
+    bullet_count = 16;
   }
 
   void update(Map const &map) {
