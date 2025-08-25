@@ -34,7 +34,7 @@ struct App {
     player.reset(map);
 
     enemies.clear();
-    enemies.emplace_back();
+    enemies.emplace_back(Vector2{600.f, 700.f});
   }
 
   void run() {
@@ -52,7 +52,7 @@ struct App {
 
   void update() {
     player.update(map);
-    for (auto& enemy : enemies) enemy.update();
+    for (auto& enemy : enemies) enemy.update(player.pos);
     map.update(player.pos);
   }
 
