@@ -1,21 +1,25 @@
 #pragma once
 
+#include "asset_manager.h"
 #include "common.h"
 #include "map.h"
 #include "raylib.h"
 
 #define ENEMY_SPEED 200.f
 #define ENEMY_TARGET_REACH_THRESHOLD 1.f
-#define ENEMY_SIZE 40.f
 
 struct Enemy {
   Vector2 pos;
   Vector2 move_target{};
   bool is_dead{false};
   float circle_frame_radius{};
+  float angle{};
 
   Enemy(Vector2 _pos) : pos(_pos), move_target(_pos) {
-    circle_frame_radius = ENEMY_SIZE / 2.f;
+    circle_frame_radius = asset_manager.textures[ASSET_ENEMY_TEXTURE].width / 2.f;
+  }
+
+  ~Enemy() {
   }
 
   void update(Vector2 const &player_pos, Map const &map) {
@@ -27,11 +31,7 @@ struct Enemy {
   }
 
   void draw(Map const &map) const {
-    DrawCircleV(Vector2Add(pos, map.world_offset), (ENEMY_SIZE / 2.f), RED);
-  }
-
-  Rectangle frame() const {
-    return Rectangle(pos.x - (ENEMY_SIZE / 2.f), pos.y - (ENEMY_SIZE / 2.f), ENEMY_SIZE, ENEMY_SIZE);
+    draw_texture(asset_manager.textures[ASSET_ENEMY_TEXTURE], Vector2Add(pos, map.world_offset), angle);
   }
 
   void kill() {
@@ -60,11 +60,15 @@ struct Enemy {
     float total_dist = Vector2Distance(pos, move_target);
     float move_dist = ENEMY_SPEED * GetFrameTime();
 
+    Vector2 old_pos{pos};
+
     if (move_dist >= total_dist) {
       pos = move_target;
     } else {
       Vector2 delta_adjusted_to_move_dist = Vector2Divide(delta, {total_dist / move_dist, total_dist / move_dist});
       pos = Vector2Subtract(pos, delta_adjusted_to_move_dist);
     }
+
+    angle = abs_angle_of_points(old_pos, pos) * RAD2DEG;
   }
 };

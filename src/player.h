@@ -3,17 +3,20 @@
 #include <algorithm>
 #include <vector>
 
+#include "asset_manager.h"
 #include "bullet.h"
+#include "collectibles.h"
 #include "common.h"
 #include "map.h"
 #include "raylib.h"
 #include "raymath.h"
 
+#define PLAYER_MAX_HEALTH 100
+
 struct Player {
   Vector2 pos{};
   float circle_frame_radius{};
   float angle;
-  Texture2D player_body_texture;
   std::vector<Bullet> bullets{};
 
   int bullet_count{};
@@ -24,21 +27,19 @@ struct Player {
   }
 
   ~Player() {
-    UnloadTexture(player_body_texture);
   }
 
   void init() {
-    player_body_texture = LoadTexture("./assets/images/player_body.png");
+    circle_frame_radius = asset_manager.textures[ASSET_PLAYER_TEXTURE].width / 2.f;
   }
 
   void reset(Map const &map) {
-    circle_frame_radius = player_body_texture.width / 2.f;
     angle = 270.f;  // Up.
     bullets.clear();
     pos.x = map.map_image.width / 2.f;
     pos.y = map.map_image.height / 2.f;
     bullet_count = 16;
-    health = 100;
+    health = PLAYER_MAX_HEALTH;
     kill_count = 0;
     _is_dead = false;
   }
@@ -56,10 +57,7 @@ struct Player {
   }
 
   void draw(Map const &map) const {
-    Vector2 rel_pos = screen_relative_center(map.world_offset);
-    DrawTexturePro(player_body_texture, {0.f, 0.f, (float)player_body_texture.width, (float)player_body_texture.height},
-                   {rel_pos.x, rel_pos.y, (float)player_body_texture.width, (float)player_body_texture.height},
-                   Vector2{player_body_texture.width / 2.f, player_body_texture.height / 2.f}, angle, WHITE);
+    draw_texture(asset_manager.textures[ASSET_PLAYER_TEXTURE], screen_relative_center(map.world_offset), angle);
 
     for (auto const &bullet : bullets) bullet.draw(map.world_offset);
 
@@ -146,6 +144,21 @@ struct Player {
 
   bool is_dead() const {
     return _is_dead;
+  }
+
+  void consume(Collectible const &collectible) {
+    switch (collectible.ty) {
+      case CollectibleType::Bullet:
+        bullet_count += 10;
+        break;
+      case CollectibleType::Health:
+        health += 20;
+        if (health > PLAYER_MAX_HEALTH) health = PLAYER_MAX_HEALTH;
+        break;
+      default:
+        TraceLog(LOG_ERROR, "Unhandled collectible type");
+        exit(EXIT_FAILURE);
+    }
   }
 
  private:

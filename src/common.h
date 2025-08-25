@@ -19,16 +19,24 @@ const int WINDOW_H = 1000;
 
 #define CELL_DISTANCE 50
 
+#define ASSET_PLAYER_TEXTURE 0
+#define ASSET_MAP_TEXTURE 1
+#define ASSET_ENEMY_TEXTURE 2
+#define ASSET_COLLECTIBLE_HEALTH_TEXTURE 3
+#define ASSET_COLLECTIBLE_BULLET_TEXTURE 4
+
+#define ASSET_MAP_IMAGE 0
+
 struct IntVector2 {
   int x{};
   int y{};
 
-  bool operator==(const IntVector2 &other) const {
+  constexpr bool operator==(const IntVector2 &other) const {
     return x == other.x && y == other.y;
   }
 };
 
-float int_vector2_dist(IntVector2 lhs, IntVector2 rhs) {
+constexpr float int_vector2_dist(IntVector2 lhs, IntVector2 rhs) {
   return sqrtf(powf(lhs.x - rhs.x, 2.f) + powf(lhs.y - rhs.y, 2.f));
 }
 
@@ -40,16 +48,16 @@ struct PFCell {
   PFCell(float _prefix, float _suffix, IntVector2 _p) : prefix(_prefix), suffix(_suffix), p(_p) {
   }
 
-  float total() const {
+  constexpr float total() const {
     return prefix + suffix;
   }
 
-  bool operator>(const PFCell &other) const {
+  constexpr bool operator>(const PFCell &other) const {
     return total() > other.total();
   }
 };
 
-Vector2 point_move_with_angle_and_distance(Vector2 p, float angle_rad, float dist) {
+constexpr Vector2 point_move_with_angle_and_distance(Vector2 p, float angle_rad, float dist) {
   return Vector2{p.x + cosf(angle_rad) * dist, p.y + sinf(angle_rad) * dist};
 }
 
@@ -58,6 +66,12 @@ float abs_angle_of_points(Vector2 const &lhs, Vector2 const &rhs) {
   return Vector2Angle({5.f, 0.f}, rhs_adjusted);
 }
 
-IntVector2 cell_idx_from_coord(Vector2 const &p) {
+constexpr IntVector2 cell_idx_from_coord(Vector2 const &p) {
   return IntVector2{(int)roundf(p.x / CELL_DISTANCE), (int)roundf(p.y / CELL_DISTANCE)};
+}
+
+void draw_texture(Texture2D const &texture, Vector2 const &pos, float angle) {
+  DrawTexturePro(texture, {0.f, 0.f, (float)texture.width, (float)texture.height},
+                 {pos.x, pos.y, (float)texture.width, (float)texture.height},
+                 Vector2{texture.width / 2.f, texture.height / 2.f}, angle, WHITE);
 }

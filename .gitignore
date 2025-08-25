@@ -3,3 +3,4 @@ test_pf
 src/*.o
 src/tests/*.o
 .vscode
+.idea
