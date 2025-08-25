@@ -29,7 +29,7 @@ struct Enemy {
   }
 
   Rectangle frame() const {
-    return Rectangle(pos.x, pos.y, ENEMY_SIZE, ENEMY_SIZE);
+    return Rectangle(pos.x - (ENEMY_SIZE / 2.f), pos.y - (ENEMY_SIZE / 2.f), ENEMY_SIZE, ENEMY_SIZE);
   }
 
   void kill() {
@@ -45,7 +45,10 @@ struct Enemy {
     }
 
     // Likely enemy is already at the zone of player.
-    if (path.size() <= 1) move_target = player_pos;
+    if (path.size() <= 1) {
+      move_target = player_pos;
+      return;
+    };
 
     move_target = Vector2(path[path.size() - 2].x * CELL_DISTANCE, path[path.size() - 2].y * CELL_DISTANCE);
   }

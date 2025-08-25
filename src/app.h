@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdlib>
+#include <ctime>
 #include <vector>
 
 #include "common.h"
@@ -7,6 +9,7 @@
 #include "map.h"
 #include "player.h"
 #include "raylib.h"
+#define ENEMY_SPAWN_COUNT 5
 
 struct App {
   Player player{};
@@ -19,6 +22,8 @@ struct App {
   }
 
   void init() {
+    srand(time(NULL));
+
     SetConfigFlags(FLAG_WINDOW_HIGHDPI);
     InitWindow(WINDOW_W, WINDOW_H, "Masacre");
     SetTargetFPS(GetMonitorRefreshRate(0));
@@ -34,7 +39,6 @@ struct App {
     player.reset(map);
 
     enemies.clear();
-    enemies.emplace_back(Vector2{600.f, 700.f});
   }
 
   void run() {
@@ -66,6 +70,19 @@ struct App {
 
     enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const auto& e) { return e.is_dead; }),
                   enemies.end());
+
+    if (enemies.empty()) {
+      for (int i = 0; i < ENEMY_SPAWN_COUNT; i++) {
+        while (true) {
+          Vector2 new_enemy_pos{(float)(rand() % map.map_image.width), (float)(rand() % map.map_image.height)};
+
+          if (!map.is_hit(new_enemy_pos)) {
+            enemies.emplace_back(new_enemy_pos);
+            break;
+          };
+        }
+      }
+    }
   }
 
   void draw() const {
