@@ -24,7 +24,7 @@ struct App {
   void init() {
     srand(time(NULL));
 
-    SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+    // SetConfigFlags(FLAG_WINDOW_HIGHDPI);
     InitWindow(WINDOW_W, WINDOW_H, "Masacre");
     SetTargetFPS(GetMonitorRefreshRate(0));
 
@@ -67,6 +67,9 @@ struct App {
           bullet.kill();
         }
       }
+
+      // if (CheckCollisionCircles()) {
+      // }
     }
 
     enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const auto& e) { return e.is_dead; }),

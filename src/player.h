@@ -15,7 +15,10 @@ struct Player {
   float angle;
   Texture2D player_body_texture;
   std::vector<Bullet> bullets{};
+
   unsigned int bullet_count{};
+  unsigned int health{};
+  unsigned int kill_count{};
 
   Player() {
   }
@@ -35,6 +38,8 @@ struct Player {
     pos.x = map.map_image.width / 2.f;
     pos.y = map.map_image.height / 2.f;
     bullet_count = 16;
+    health = 100;
+    kill_count = 0;
   }
 
   void update(Map const &map) {
@@ -43,7 +48,9 @@ struct Player {
     if (IsKeyDown(KEY_LEFT)) angle -= PLAYER_ANGLE_SPEED * GetFrameTime();
     if (IsKeyDown(KEY_RIGHT)) angle += PLAYER_ANGLE_SPEED * GetFrameTime();
 
-    if (IsKeyPressed(KEY_LEFT_CONTROL)) {
+    if (IsKeyPressed(KEY_LEFT_CONTROL) && bullet_count > 0) {
+      bullet_count--;
+
       float bullet_angle_rad = angle * DEG2RAD;
       Vector2 bullet_v{cosf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime(),
                        sinf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime()};
@@ -66,6 +73,10 @@ struct Player {
 
     DrawText(TextFormat("Player: %.2f:%.2f", pos.x, pos.y), 10, 70, 20, ORANGE);
     DrawText(map.is_hit(pos) ? "hit" : "miss", 10, 30, 20, ORANGE);
+
+    DrawRectangle(0, GetScreenHeight() - 22, GetScreenWidth(), 22, DARKGRAY);
+    DrawText(TextFormat("[ Health: %d ][ Ammo: %d ][ Kills: %d ]", health, bullet_count, kill_count), 10,
+             GetScreenHeight() - 20, 20, RAYWHITE);
   }
 
   void update_movement(Map const &map) {
