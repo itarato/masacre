@@ -12,7 +12,9 @@
 #define MAX_GRID_CELLS 10000
 
 #define HEURISTIC_STRATEGY_TAXI_DIST 0b00
-#define HEURISTIC_STRATEGY HEURISTIC_STRATEGY_TAXI_DIST
+#define HEURISTIC_STRATEGY_EUCLIDEAN_DIST 0b01
+#define HEURISTIC_STRATEGY HEURISTIC_STRATEGY_EUCLIDEAN_DIST
+
 #define PF_CELL_IDX(x, y) (y * cells_w + x)
 
 #define PF_CELL_FLAG_VISITED 0b1
@@ -105,6 +107,8 @@ struct PathFinder {
     switch (HEURISTIC_STRATEGY) {
       case HEURISTIC_STRATEGY_TAXI_DIST:
         return (float)abs(lhs.x - rhs.x) + abs(lhs.y - rhs.y);
+      case HEURISTIC_STRATEGY_EUCLIDEAN_DIST:
+        return int_vector2_dist(lhs, rhs);
       default:
         TraceLog(LOG_ERROR, "Invalid heuristic strategy.");
         exit(EXIT_FAILURE);

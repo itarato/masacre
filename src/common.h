@@ -28,6 +28,10 @@ struct IntVector2 {
   }
 };
 
+float int_vector2_dist(IntVector2 lhs, IntVector2 rhs) {
+  return sqrtf(powf(lhs.x - rhs.x, 2.f) + powf(lhs.y - rhs.y, 2.f));
+}
+
 struct PFCell {
   float prefix{};  // G
   float suffix{};  // H
