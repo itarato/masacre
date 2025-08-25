@@ -68,8 +68,9 @@ struct App {
         }
       }
 
-      // if (CheckCollisionCircles()) {
-      // }
+      if (CheckCollisionCircles(player.pos, player.circle_frame_radius, enemy.pos, enemy.circle_frame_radius)) {
+        player.hurt();
+      }
     }
 
     enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const auto& e) { return e.is_dead; }),

@@ -12,8 +12,10 @@ struct Enemy {
   Vector2 pos;
   Vector2 move_target{};
   bool is_dead{false};
+  float circle_frame_radius{};
 
   Enemy(Vector2 _pos) : pos(_pos), move_target(_pos) {
+    circle_frame_radius = ENEMY_SIZE / 2.f;
   }
 
   void update(Vector2 const &player_pos, Map const &map) {

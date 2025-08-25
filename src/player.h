@@ -11,14 +11,14 @@
 
 struct Player {
   Vector2 pos{};
-  Vector2 frame{};
+  float circle_frame_radius{};
   float angle;
   Texture2D player_body_texture;
   std::vector<Bullet> bullets{};
 
-  unsigned int bullet_count{};
-  unsigned int health{};
-  unsigned int kill_count{};
+  int bullet_count{};
+  int health{};
+  int kill_count{};
 
   Player() {
   }
@@ -32,7 +32,7 @@ struct Player {
   }
 
   void reset(Map const &map) {
-    frame = Vector2(player_body_texture.width, player_body_texture.height);
+    circle_frame_radius = player_body_texture.width / 2.f;
     angle = 270.f;  // Up.
     bullets.clear();
     pos.x = map.map_image.width / 2.f;
@@ -40,26 +40,18 @@ struct Player {
     bullet_count = 16;
     health = 100;
     kill_count = 0;
+    _is_dead = false;
   }
 
   void update(Map const &map) {
-    update_movement(map);
-
-    if (IsKeyDown(KEY_LEFT)) angle -= PLAYER_ANGLE_SPEED * GetFrameTime();
-    if (IsKeyDown(KEY_RIGHT)) angle += PLAYER_ANGLE_SPEED * GetFrameTime();
-
-    if (IsKeyPressed(KEY_LEFT_CONTROL) && bullet_count > 0) {
-      bullet_count--;
-
-      float bullet_angle_rad = angle * DEG2RAD;
-      Vector2 bullet_v{cosf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime(),
-                       sinf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime()};
-      bullets.emplace_back(pos, bullet_v);
+    if (!is_dead()) {
+      update_movement(map);
+      update_rotation();
+      update_shooting();
     }
 
     bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const auto &e) { return e.is_dead; }),
                   bullets.end());
-
     for (auto &bullet : bullets) bullet.update(map);
   }
 
@@ -67,7 +59,7 @@ struct Player {
     Vector2 rel_pos = screen_relative_center(map.world_offset);
     DrawTexturePro(player_body_texture, {0.f, 0.f, (float)player_body_texture.width, (float)player_body_texture.height},
                    {rel_pos.x, rel_pos.y, (float)player_body_texture.width, (float)player_body_texture.height},
-                   Vector2Divide(frame, {2.f, 2.f}), angle, WHITE);
+                   Vector2{player_body_texture.width / 2.f, player_body_texture.height / 2.f}, angle, WHITE);
 
     for (auto const &bullet : bullets) bullet.draw(map.world_offset);
 
@@ -77,6 +69,22 @@ struct Player {
     DrawRectangle(0, GetScreenHeight() - 22, GetScreenWidth(), 22, DARKGRAY);
     DrawText(TextFormat("[ Health: %d ][ Ammo: %d ][ Kills: %d ]", health, bullet_count, kill_count), 10,
              GetScreenHeight() - 20, 20, RAYWHITE);
+  }
+
+  void update_rotation() {
+    if (IsKeyDown(KEY_LEFT)) angle -= PLAYER_ANGLE_SPEED * GetFrameTime();
+    if (IsKeyDown(KEY_RIGHT)) angle += PLAYER_ANGLE_SPEED * GetFrameTime();
+  }
+
+  void update_shooting() {
+    if (IsKeyPressed(KEY_LEFT_CONTROL) && bullet_count > 0) {
+      bullet_count--;
+
+      float bullet_angle_rad = angle * DEG2RAD;
+      Vector2 bullet_v{cosf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime(),
+                       sinf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime()};
+      bullets.emplace_back(pos, bullet_v);
+    }
   }
 
   void update_movement(Map const &map) {
@@ -121,4 +129,25 @@ struct Player {
     pos.x += cosf(abs_angle) * PLAYER_SPEED * GetFrameTime();
     pos.y += sinf(abs_angle) * PLAYER_SPEED * GetFrameTime();
   }
+
+  void hurt() {
+    int hurt_val = 1;
+    if (health > hurt_val) {
+      //  TODO: This is frame rate dependent. Add 1s sleep.
+      health -= hurt_val;
+    } else {
+      health = 0;
+    }
+
+    if (health == 0) {
+      _is_dead = true;
+    }
+  }
+
+  bool is_dead() const {
+    return _is_dead;
+  }
+
+ private:
+  bool _is_dead{false};
 };
