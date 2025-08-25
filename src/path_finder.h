@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
+#include <ranges>
 
 #include "common.h"
 #include "raylib.h"
@@ -64,7 +65,7 @@ struct PathFinder {
 
     while (!queue.empty()) {
       // Get the most promising cell.
-      std::pop_heap(queue.begin(), queue.end(), std::greater{});
+      std::ranges::pop_heap(queue, std::greater{});
       PFCell min_cell = queue.back();
       queue.pop_back();
 
@@ -90,7 +91,7 @@ struct PathFinder {
         // Calculate and save new cell.
         queue.emplace_back(heuristic_distance(min_cell.p, neighbor_coord), heuristic_distance(neighbor_coord, end),
                            neighbor_coord);
-        std::push_heap(queue.begin(), queue.end(), std::greater{});
+        std::ranges::push_heap(queue, std::greater{});
 
         TraceLog(LOG_DEBUG, "- pushed: %d:%d", neighbor_coord.x, neighbor_coord.y);
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <vector>
 
 #include "asset_manager.h"
@@ -22,12 +21,6 @@ struct Player {
   int bullet_count{};
   int health{};
   int kill_count{};
-
-  Player() {
-  }
-
-  ~Player() {
-  }
 
   void init() {
     circle_frame_radius = asset_manager.textures[ASSET_PLAYER_TEXTURE].width / 2.f;
@@ -51,8 +44,7 @@ struct Player {
       update_shooting();
     }
 
-    bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const auto &e) { return e.is_dead; }),
-                  bullets.end());
+    std::erase_if(bullets, [](auto e) { return e.is_dead; });
     for (auto &bullet : bullets) bullet.update(map);
   }
 
@@ -118,19 +110,18 @@ struct Player {
     }
   }
 
-  Vector2 screen_relative_center(Vector2 world_offset) const {
+  [[nodiscard]] Vector2 screen_relative_center(const Vector2 &world_offset) const {
     return Vector2Add(pos, world_offset);
   }
 
-  void move_to_relative_direction(float rel_rad_angle) {
-    float abs_angle = (angle * DEG2RAD) + rel_rad_angle;
+  void move_to_relative_direction(const float rel_rad_angle) {
+    const float abs_angle = (angle * DEG2RAD) + rel_rad_angle;
     pos.x += cosf(abs_angle) * PLAYER_SPEED * GetFrameTime();
     pos.y += sinf(abs_angle) * PLAYER_SPEED * GetFrameTime();
   }
 
   void hurt() {
-    int hurt_val = 1;
-    if (health > hurt_val) {
+    if (constexpr int hurt_val = 1; health > hurt_val) {
       //  TODO: This is frame rate dependent. Add 1s sleep.
       health -= hurt_val;
     } else {
@@ -142,7 +133,7 @@ struct Player {
     }
   }
 
-  bool is_dead() const {
+  [[nodiscard]] bool is_dead() const {
     return _is_dead;
   }
 

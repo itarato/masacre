@@ -36,35 +36,8 @@ struct Map {
     update_world_offset(player_pos);
   }
 
-  void draw(Vector2 const& player_pos) const {
+  void draw() const {
     DrawTextureV(map_texture, world_offset, WHITE);
-
-    // Debug  grid.
-    // for (int i = -10; i <= 10; i++) {
-    //   Color color = LIGHTGRAY;
-    //   if (i == 0) {
-    //     color = RED;
-    //   }
-    //   DrawLine(i * 100 + world_offset.x, -1000 + world_offset.y, i * 100 + world_offset.x, 1000 + world_offset.y,
-    //            color);
-    //   DrawLine(-1000 + world_offset.x, i * 100 + world_offset.y, 1000 + world_offset.x, i * 100 + world_offset.y,
-    //            color);
-    // }
-
-    // Debug available cells.
-    // for (int y = 0; y <= path_finder.cells_h; y++) {
-    //   for (int x = 0; x <= path_finder.cells_w; x++) {
-    //     if (path_finder.cells[y * path_finder.cells_w + x] > 0) {
-    //       DrawCircle(x * CELL_DISTANCE + world_offset.x, y * CELL_DISTANCE + world_offset.y, 6, BROWN);
-    //     }
-    //   }
-    // }
-
-    // Example path finding.
-    // auto path = path_finder.find_path(player_pos, Vector2Subtract(GetMousePosition(), world_offset));
-    // for (auto& coord : path) {
-    //   DrawCircle(coord.x * CELL_DISTANCE + world_offset.x, coord.y * CELL_DISTANCE + world_offset.y, 8, MAGENTA);
-    // }
   }
 
   void update_world_offset(Vector2 player_pos) {

@@ -22,13 +22,8 @@ struct App {
   std::vector<Enemy> enemies{};
   std::vector<Collectible> collectibles{};
 
-  App() {
-  }
-  ~App() {
-  }
-
   void init() {
-    srand(time(NULL));
+    srand(time(nullptr));
 
     // SetConfigFlags(FLAG_WINDOW_HIGHDPI);
     InitWindow(WINDOW_W, WINDOW_H, "Masacre");
@@ -93,11 +88,8 @@ struct App {
       }
     }
 
-    enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const auto& e) { return e.is_dead; }),
-                  enemies.end());
-    collectibles.erase(
-        std::remove_if(collectibles.begin(), collectibles.end(), [](const auto& e) { return e.is_dead; }),
-        collectibles.end());
+    std::erase_if(enemies, [](const auto& e) { return e.is_dead; });
+    std::erase_if(collectibles, [](const auto& e) { return e.is_dead; });
 
     if (enemies.empty()) {
       for (int i = 0; i < ENEMY_SPAWN_COUNT; i++) enemies.emplace_back(available_random_spot());
@@ -112,7 +104,7 @@ struct App {
   }
 
   void draw() const {
-    map.draw(player.pos);
+    map.draw();
 
     for (auto const& enemy : enemies) enemy.draw(map);
     for (auto const& collectible : collectibles) collectible.draw(map);
