@@ -32,4 +32,8 @@ struct Bullet {
   Vector2 get_rel_pos(Vector2 const &world_offset) const {
     return Vector2Add(pos, world_offset);
   }
+
+  void kill() {
+    is_dead = true;
+  }
 };

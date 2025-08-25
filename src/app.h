@@ -52,8 +52,20 @@ struct App {
 
   void update() {
     player.update(map);
-    for (auto& enemy : enemies) enemy.update(player.pos);
+    for (auto& enemy : enemies) enemy.update(player.pos, map);
     map.update(player.pos);
+
+    for (auto& enemy : enemies) {
+      for (auto& bullet : player.bullets) {
+        if (CheckCollisionPointRec(bullet.pos, enemy.frame())) {
+          enemy.kill();
+          bullet.kill();
+        }
+      }
+    }
+
+    enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const auto& e) { return e.is_dead; }),
+                  enemies.end());
   }
 
   void draw() const {

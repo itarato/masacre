@@ -48,7 +48,7 @@ struct Player {
       bullets.emplace_back(pos, bullet_v);
     }
 
-    bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [&map](const auto &e) { return e.is_dead; }),
+    bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const auto &e) { return e.is_dead; }),
                   bullets.end());
 
     for (auto &bullet : bullets) bullet.update(map);
