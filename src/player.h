@@ -54,6 +54,17 @@ struct Player {
     for (auto &bullet : bullets) bullet.update(map);
 
     particle_manager.update();
+
+    if (health >= PLAYER_MAX_HEALTH * 0.95) {
+      smoke_particle_scheduler.pause();
+    } else if (health >= PLAYER_MAX_HEALTH * 0.25) {
+      smoke_particle_scheduler.resume();
+      smoke_particle_scheduler.set_interval(0.08);
+    } else {
+      smoke_particle_scheduler.resume();
+      smoke_particle_scheduler.set_interval(0.02);
+    }
+
     smoke_particle_scheduler.update();
 
     if (smoke_particle_scheduler.did_tick) particle_manager.particles.push_back(std::make_unique<SmokeParticle>(pos));

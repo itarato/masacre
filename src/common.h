@@ -83,15 +83,29 @@ struct RepeatedTask {
   double interval_seconds;
   double last_tick{0.0};
   bool did_tick{false};
+  bool is_paused{false};
 
   explicit RepeatedTask(double _interval_seconds) : interval_seconds(_interval_seconds) {
+  }
+
+  void pause() {
+    is_paused = true;
+  }
+
+  void resume() {
+    is_paused = false;
+  }
+
+  void set_interval(double _interval_seconds) {
+    interval_seconds = _interval_seconds;
   }
 
   void update() {
     did_tick = false;
 
-    const double time = GetTime();
-    if (last_tick + interval_seconds < time) {
+    if (is_paused) return;
+
+    if (last_tick + interval_seconds < GetTime()) {
       did_tick = true;
       last_tick += interval_seconds;
     }
