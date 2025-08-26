@@ -12,6 +12,10 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#define PLAYER_SPEED 400.f
+#define PLAYER_ANGLE_SPEED 300.f
+#define PLAYER_WALL_COLLIDE_ANGLE_ADJUST PI / 3.f
+#define PLAYER_WALL_COLLIDE_DISTANCE_ADJUST 0.5f
 #define PLAYER_MAX_HEALTH 100
 
 struct Player {

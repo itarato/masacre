@@ -40,9 +40,11 @@ struct Enemy {
 
       barrel_angle_rad = abs_angle_of_points(pos, player_pos);
 
+      // Shoot the player.
       if (shooting_task.did_tick) {
-        Vector2 bullet_v{cosf(barrel_angle_rad) * BULLET_SPEED * GetFrameTime(),
-                         sinf(barrel_angle_rad) * BULLET_SPEED * GetFrameTime()};
+        float aim_jitter_rad = ((rand() % 31) - 15) * DEG2RAD;
+        Vector2 bullet_v{cosf(barrel_angle_rad + aim_jitter_rad) * BULLET_SPEED * GetFrameTime(),
+                         sinf(barrel_angle_rad + aim_jitter_rad) * BULLET_SPEED * GetFrameTime()};
         game_scope.enemy_bullets.emplace_back(pos, bullet_v);
       }
     }

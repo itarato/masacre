@@ -5,6 +5,8 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#define WORLD_PLAYER_MIDZONE_MARGIN_PERCENTAGE 0.3f
+
 struct Map {
   Vector2 world_offset{};
   Texture2D map_texture;

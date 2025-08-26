@@ -6,6 +6,18 @@
 #include "common.h"
 #include "raylib.h"
 
+#define ASSET_PLAYER_TEXTURE 0
+#define ASSET_MAP_TEXTURE 1
+#define ASSET_ENEMY_WHEEL_TEXTURE 2
+#define ASSET_COLLECTIBLE_HEALTH_TEXTURE 3
+#define ASSET_COLLECTIBLE_BULLET_TEXTURE 4
+#define ASSET_ICON_HEALTH_TEXTURE 5
+#define ASSET_ICON_BULLET_TEXTURE 6
+#define ASSET_ICON_FPS_TEXTURE 7
+#define ASSET_ENEMY_BARREL_TEXTURE 8
+
+#define ASSET_MAP_IMAGE 0
+
 struct AssetManager {
   std::unordered_map<int, Texture2D> textures{};
   std::unordered_map<int, Image> images{};
