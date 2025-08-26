@@ -39,18 +39,18 @@ struct Player {
     bullet_count = 16;
     health = PLAYER_MAX_HEALTH;
     kill_count = 0;
-    _is_dead = false;
+    _should_be_deleted = false;
     particle_manager.reset();
   }
 
   void update(Map const &map) {
-    if (!is_dead()) {
+    if (!should_be_deleted()) {
       update_movement(map);
       update_rotation();
       update_shooting();
     }
 
-    std::erase_if(bullets, [](auto e) { return e.is_dead; });
+    std::erase_if(bullets, [](auto e) { return e.should_be_deleted; });
     for (auto &bullet : bullets) bullet.update(map);
 
     particle_manager.update();
@@ -153,12 +153,12 @@ struct Player {
     health -= hurt_val * GetFrameTime();
 
     if (health <= 0) {
-      _is_dead = true;
+      _should_be_deleted = true;
     }
   }
 
-  [[nodiscard]] bool is_dead() const {
-    return _is_dead;
+  [[nodiscard]] bool should_be_deleted() const {
+    return _should_be_deleted;
   }
 
   void consume(Collectible const &collectible) {
@@ -177,5 +177,5 @@ struct Player {
   }
 
  private:
-  bool _is_dead{false};
+  bool _should_be_deleted{false};
 };

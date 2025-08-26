@@ -84,13 +84,13 @@ struct App {
     for (auto& collectible : collectibles) {
       if (CheckCollisionCircles(collectible.pos, collectible.circle_frame_radius, player.pos,
                                 player.circle_frame_radius)) {
-        collectible.is_dead = true;
+        collectible.should_be_deleted = true;
         player.consume(collectible);
       }
     }
 
-    std::erase_if(enemies, [](const auto& e) { return e.is_dead; });
-    std::erase_if(collectibles, [](const auto& e) { return e.is_dead; });
+    std::erase_if(enemies, [](const auto& e) { return e.should_be_deleted(); });
+    std::erase_if(collectibles, [](const auto& e) { return e.should_be_deleted; });
 
     if (enemies.empty()) {
       for (int i = 0; i < ENEMY_SPAWN_COUNT; i++) enemies.emplace_back(available_random_spot());

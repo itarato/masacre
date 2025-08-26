@@ -2,10 +2,10 @@
 
 #include <cstdlib>
 
+#include "asset_manager.h"
 #include "common.h"
 #include "map.h"
 #include "raylib.h"
-#include "asset_manager.h"
 
 #define COLLECTIBLE_RADIUS 20.f
 
@@ -17,7 +17,7 @@ enum class CollectibleType {
 struct Collectible {
   Vector2 pos;
   CollectibleType ty;
-  bool is_dead{false};
+  bool should_be_deleted{false};
   float circle_frame_radius;
 
   Collectible(Vector2 _pos, CollectibleType _ty) : pos(_pos), ty(_ty) {

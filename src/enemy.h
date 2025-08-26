@@ -1,44 +1,69 @@
 #pragma once
 
+#include <memory>
+
 #include "asset_manager.h"
 #include "common.h"
 #include "map.h"
+#include "particles.h"
 #include "raylib.h"
 
 #define ENEMY_SPEED 200.f
 #define ENEMY_TARGET_REACH_THRESHOLD 1.f
+#define ENEMY_EXPLOSION_SPEED 200.f
 
 struct Enemy {
   Vector2 pos;
   Vector2 move_target{};
-  bool is_dead{false};
   float circle_frame_radius{};
   float angle{};
+  bool is_dead{false};
+  TimedTask dying_lifetime{2.0};
+  ParticleManager particle_manager{};
 
   Enemy(Vector2 _pos) : pos(_pos), move_target(_pos) {
     circle_frame_radius = asset_manager.textures[ASSET_ENEMY_TEXTURE].width / 2.f;
   }
 
-  ~Enemy() {
-  }
-
   void update(Vector2 const &player_pos, Map const &map) {
-    if (Vector2Distance(pos, move_target) <= ENEMY_TARGET_REACH_THRESHOLD) {
-      update_move_target(player_pos, map);
-    } else {
-      update_movement_towards_target();
+    if (!is_dead) {
+      if (Vector2Distance(pos, move_target) <= ENEMY_TARGET_REACH_THRESHOLD) {
+        update_move_target(player_pos, map);
+      } else {
+        update_movement_towards_target();
+      }
     }
+
+    particle_manager.update();
   }
 
   void draw(Map const &map) const {
     draw_texture(asset_manager.textures[ASSET_ENEMY_TEXTURE], Vector2Add(pos, map.world_offset), angle);
+    particle_manager.draw(map);
   }
 
   void kill() {
+    if (is_dead) return;
+
     is_dead = true;
+    dying_lifetime.reset();
+
+    for (int i = 0; i < 32; i++) {
+      float particle_angle = static_cast<float>((rand() % 360) * DEG2RAD);
+      float particle_speed_jitter = static_cast<float>(rand() % 100) / 200.f + 0.75f;
+      Vector2 v{cosf(particle_angle) * ENEMY_EXPLOSION_SPEED * GetFrameTime() * particle_speed_jitter,
+                sinf(particle_angle) * ENEMY_EXPLOSION_SPEED * GetFrameTime() * particle_speed_jitter};
+      particle_manager.particles.push_back(std::make_unique<ExplosionParticle>(pos, v));
+    }
   }
 
-  float attack_damage() const {
+  bool should_be_deleted() const {
+    return is_dead && dying_lifetime.is_completed();
+  }
+
+  float attack_damage() {
+    if (is_dead) return 0;
+
     return 10;
   }
 
@@ -50,7 +75,7 @@ struct Enemy {
       return;
     }
 
-    // Likely enemy is already at the zone of player.
+    // Likely the enemy is already at the zone of player.
     if (path.size() <= 1) {
       move_target = player_pos;
       return;

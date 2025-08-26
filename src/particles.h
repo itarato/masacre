@@ -13,7 +13,7 @@
 
 struct Particle {
   Vector2 pos{};
-  bool is_dead{false};
+  bool should_be_deleted{false};
 
   explicit Particle(Vector2 _pos) : pos(_pos) {
   }
@@ -43,19 +43,21 @@ struct SmokeParticle final : Particle {
     radius += GetFrameTime() * 10.f;
     alpha -= GetFrameTime() * 0.1f;
 
-    if (lifetime.is_completed()) is_dead = true;
+    if (lifetime.is_completed()) should_be_deleted = true;
   };
 };
 
-struct Explosion final : Particle {
+struct ExplosionParticle final : Particle {
   Vector2 v{};
   TimedTask lifetime;
+  float size_jitter;
 
-  Explosion(Vector2 _pos, Vector2 _v) : Particle(_pos), v(_v), lifetime(2.0) {
+  ExplosionParticle(Vector2 _pos, Vector2 _v) : Particle(_pos), v(_v), lifetime(1.5) {
+    size_jitter = static_cast<float>(rand() % 100) / 200.f + 0.75f;
   }
 
   void draw(Map const &map) const override {
-    DrawCircleV(Vector2Add(pos, map.world_offset), 10.f, GOLD);
+    DrawCircleV(Vector2Add(pos, map.world_offset), 6.f * size_jitter, GOLD);
   };
 
   void update() override {
@@ -65,7 +67,7 @@ struct Explosion final : Particle {
     v.x *= powf(0.99f, static_cast<float>(REFERENCE_FPS) / static_cast<float>(GetFPS()));
     v.y *= powf(0.99f, static_cast<float>(REFERENCE_FPS) / static_cast<float>(GetFPS()));
 
-    if (lifetime.is_completed()) is_dead = true;
+    if (lifetime.is_completed()) should_be_deleted = true;
   }
 };
 
@@ -74,7 +76,7 @@ struct ParticleManager {
 
   void update() {
     for (auto &particle : particles) particle->update();
-    std::erase_if(particles, [](auto const &e) { return e->is_dead; });
+    std::erase_if(particles, [](auto const &e) { return e->should_be_deleted; });
   }
 
   void draw(Map const &map) const {

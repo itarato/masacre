@@ -63,13 +63,19 @@ struct PFCell {
 };
 
 struct TimedTask {
-  double lifetime_end;
+  double lifetime_seconds;
+  double lifetime_end{};
 
-  TimedTask(double lifetime_seconds) : lifetime_end(GetTime() + lifetime_seconds) {
+  TimedTask(double _lifetime_seconds) : lifetime_seconds(_lifetime_seconds) {
+    reset();
   }
 
   bool is_completed() const {
     return GetTime() > lifetime_end;
+  }
+
+  void reset() {
+    lifetime_end = GetTime() + lifetime_seconds;
   }
 };
 

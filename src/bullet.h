@@ -6,7 +6,7 @@
 struct Bullet {
   Vector2 pos{};
   Vector2 v{};
-  bool is_dead{false};
+  bool should_be_deleted{false};
 
   Bullet(Vector2 _pos, Vector2 _v) : pos(_pos), v(_v) {
   }
@@ -19,12 +19,13 @@ struct Bullet {
     pos.x += v.x;
     pos.y += v.y;
 
-    if (!is_dead) {
+    if (!should_be_deleted) {
       if (map.is_hit(pos)) {
-        is_dead = true;
+        should_be_deleted = true;
       } else {
         Vector2 rel_pos = get_rel_pos(map.world_offset);
-        is_dead |= rel_pos.x < 0.f || rel_pos.y < 0.f || rel_pos.x > GetScreenWidth() || rel_pos.y > GetScreenHeight();
+        should_be_deleted |=
+            rel_pos.x < 0.f || rel_pos.y < 0.f || rel_pos.x > GetScreenWidth() || rel_pos.y > GetScreenHeight();
       }
     }
   }
@@ -34,6 +35,6 @@ struct Bullet {
   }
 
   void kill() {
-    is_dead = true;
+    should_be_deleted = true;
   }
 };
