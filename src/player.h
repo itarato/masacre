@@ -19,7 +19,7 @@
 #define PLAYER_MAX_HEALTH 100
 
 struct Player {
-  Vector2 pos{};
+  std::shared_ptr<Vector2> pos = std::make_shared<Vector2>();
   float circle_frame_radius{};
   float angle;
   std::vector<Bullet> bullets{};
@@ -38,8 +38,8 @@ struct Player {
   void reset(Map const &map) {
     angle = 270.f;  // Up.
     bullets.clear();
-    pos.x = map.map_image.width / 2.f;
-    pos.y = map.map_image.height / 2.f;
+    pos->x = map.map_image.width / 2.f;
+    pos->y = map.map_image.height / 2.f;
     bullet_count = 16;
     health = PLAYER_MAX_HEALTH;
     kill_count = 0;
@@ -71,7 +71,7 @@ struct Player {
 
     smoke_particle_scheduler.update();
 
-    if (smoke_particle_scheduler.did_tick) particle_manager.particles.push_back(std::make_unique<SmokeParticle>(pos));
+    if (smoke_particle_scheduler.did_tick) particle_manager.particles.push_back(std::make_unique<SmokeParticle>(*pos));
   }
 
   void draw(Map const &map) const {
@@ -117,12 +117,12 @@ struct Player {
       float bullet_angle_rad = angle * DEG2RAD;
       Vector2 bullet_v{cosf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime(),
                        sinf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime()};
-      bullets.emplace_back(pos, bullet_v);
+      bullets.emplace_back(*pos, bullet_v);
     }
   }
 
   void update_movement(Map const &map) {
-    Vector2 old_pos = pos;
+    Vector2 old_pos = *pos;
 
     if (IsKeyDown(KEY_UP)) move_to_relative_direction(0.f);
     if (IsKeyDown(KEY_DOWN)) move_to_relative_direction(PI);
@@ -130,15 +130,15 @@ struct Player {
     if (IsKeyDown(KEY_A)) move_to_relative_direction(-PI / 2.f);
     if (IsKeyDown(KEY_D)) move_to_relative_direction(PI / 2.f);
 
-    if (!Vector2Equals(pos, old_pos) && map.is_hit(pos)) {
-      float move_angle_rad = abs_angle_of_points(old_pos, pos);
+    if (!Vector2Equals(*pos, old_pos) && map.is_hit(*pos)) {
+      float move_angle_rad = abs_angle_of_points(old_pos, *pos);
 
-      float dist = Vector2Distance(old_pos, pos);
+      float dist = Vector2Distance(old_pos, *pos);
       float angle_left_attempt = move_angle_rad - PLAYER_WALL_COLLIDE_ANGLE_ADJUST;
       Vector2 left_attempt =
           point_move_with_angle_and_distance(old_pos, angle_left_attempt, dist * PLAYER_WALL_COLLIDE_DISTANCE_ADJUST);
       if (!map.is_hit(left_attempt)) {
-        pos = left_attempt;
+        *pos = left_attempt;
         return;
       }
 
@@ -146,22 +146,22 @@ struct Player {
       Vector2 right_attempt =
           point_move_with_angle_and_distance(old_pos, angle_right_attempt, dist * PLAYER_WALL_COLLIDE_DISTANCE_ADJUST);
       if (!map.is_hit(right_attempt)) {
-        pos = right_attempt;
+        *pos = right_attempt;
         return;
       }
 
-      pos = old_pos;
+      *pos = old_pos;
     }
   }
 
   [[nodiscard]] Vector2 screen_relative_center(const Vector2 &world_offset) const {
-    return Vector2Add(pos, world_offset);
+    return Vector2Add(*pos, world_offset);
   }
 
   void move_to_relative_direction(const float rel_rad_angle) {
     const float abs_angle = (angle * DEG2RAD) + rel_rad_angle;
-    pos.x += cosf(abs_angle) * PLAYER_SPEED * GetFrameTime();
-    pos.y += sinf(abs_angle) * PLAYER_SPEED * GetFrameTime();
+    pos->x += cosf(abs_angle) * PLAYER_SPEED * GetFrameTime();
+    pos->y += sinf(abs_angle) * PLAYER_SPEED * GetFrameTime();
   }
 
   void hurt(float hurt_val) {

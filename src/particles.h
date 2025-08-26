@@ -118,12 +118,12 @@ struct StraightLineParticle final : Particle {
 };
 
 struct BurnParticleGroup final : Particle {
-  Vector2 *player_pos;
+  std::shared_ptr<Vector2> player_pos;
   TimedTask lifetime{1.0};
   RepeatedTask particle_repeater{0.02};
   ParticleManager particle_manager{};
 
-  BurnParticleGroup(Vector2 *_player_pos) : Particle(), player_pos(_player_pos) {
+  BurnParticleGroup(std::shared_ptr<Vector2> _player_pos) : Particle(), player_pos(_player_pos) {
   }
 
   void update() override {

@@ -63,9 +63,9 @@ struct App {
 
     player.update(map);
 
-    for (auto& enemy : enemies) enemy.update(player.pos, map);
+    for (auto& enemy : enemies) enemy.update(*player.pos, map);
 
-    map.update(player.pos);
+    map.update(*player.pos);
 
     game_scope.update(map, player);
 
@@ -79,13 +79,13 @@ struct App {
         }
       }
 
-      if (CheckCollisionCircles(player.pos, player.circle_frame_radius, enemy.pos, enemy.circle_frame_radius)) {
+      if (CheckCollisionCircles(*player.pos, player.circle_frame_radius, enemy.pos, enemy.circle_frame_radius)) {
         player.hurt(enemy.attack_damage());
       }
     }
 
     for (auto& collectible : collectibles) {
-      if (CheckCollisionCircles(collectible.pos, collectible.circle_frame_radius, player.pos,
+      if (CheckCollisionCircles(collectible.pos, collectible.circle_frame_radius, *player.pos,
                                 player.circle_frame_radius)) {
         collectible.should_be_deleted = true;
         player.consume(collectible);
@@ -110,7 +110,7 @@ struct App {
   void draw() const {
     map.draw();
 
-    for (auto const& enemy : enemies) enemy.draw(map, player.pos);
+    for (auto const& enemy : enemies) enemy.draw(map, *player.pos);
     for (auto const& collectible : collectibles) collectible.draw(map);
 
     game_scope.draw(map);

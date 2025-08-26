@@ -19,10 +19,10 @@ struct GameScope {
     std::erase_if(enemy_bullets, [](auto e) { return e.should_be_deleted; });
 
     for (auto &bullet : enemy_bullets) {
-      if (CheckCollisionPointCircle(bullet.pos, player.pos, player.circle_frame_radius)) {
+      if (CheckCollisionPointCircle(bullet.pos, *player.pos, player.circle_frame_radius)) {
         bullet.kill();
         player.hurt(bullet.attach_damage());
-        player.particle_manager.particles.emplace_back(std::make_unique<BurnParticleGroup>(&player.pos));
+        player.particle_manager.particles.emplace_back(std::make_unique<BurnParticleGroup>(player.pos));
       }
     }
   }
