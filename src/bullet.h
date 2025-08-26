@@ -1,5 +1,6 @@
 #pragma once
 
+#include "map.h"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -11,8 +12,8 @@ struct Bullet {
   Bullet(Vector2 _pos, Vector2 _v) : pos(_pos), v(_v) {
   }
 
-  void draw(Vector2 const &world_offset) const {
-    DrawCircleV(get_rel_pos(world_offset), 4.f, DARKGREEN);
+  void draw(Map const &map) const {
+    DrawCircleV(get_rel_pos(map.world_offset), 4.f, DARKGREEN);
   }
 
   void update(Map const &map) {

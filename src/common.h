@@ -33,6 +33,10 @@ constexpr int WINDOW_H = 1000;
 
 #define REFERENCE_FPS 144
 
+float randf() {
+  return static_cast<float>(rand() % 1001) / 1000.0;
+}
+
 struct IntVector2 {
   int x{};
   int y{};
@@ -85,8 +89,14 @@ struct RepeatedTask {
   double last_tick{0.0};
   bool did_tick{false};
   bool is_paused{false};
+  double additional_jitter{0.f};
+  double current_jitter{0.f};
 
   explicit RepeatedTask(double _interval_seconds) : interval_seconds(_interval_seconds) {
+  }
+
+  explicit RepeatedTask(double _interval_seconds, double _additional_jitter)
+      : interval_seconds(_interval_seconds), additional_jitter(_additional_jitter) {
   }
 
   void pause() {
@@ -106,9 +116,13 @@ struct RepeatedTask {
 
     if (is_paused) return;
 
-    if (last_tick + interval_seconds < GetTime()) {
+    if (last_tick + interval_seconds + current_jitter < GetTime()) {
       did_tick = true;
-      last_tick += interval_seconds;
+      last_tick += interval_seconds + current_jitter;
+
+      if (additional_jitter > 0.f) {
+        current_jitter = randf() * additional_jitter;
+      }
     }
   }
 };
@@ -130,4 +144,8 @@ void draw_texture(Texture2D const &texture, Vector2 const &pos, float angle_deg)
   DrawTexturePro(texture, {0.f, 0.f, (float)texture.width, (float)texture.height},
                  {pos.x, pos.y, (float)texture.width, (float)texture.height},
                  Vector2{texture.width / 2.f, texture.height / 2.f}, angle_deg, WHITE);
+}
+
+float fps_independent_multiplier() {
+  return static_cast<float>(REFERENCE_FPS) / static_cast<float>(GetFPS());
 }

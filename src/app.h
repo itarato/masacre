@@ -42,6 +42,7 @@ struct App {
     player.reset(map);
     enemies.clear();
     collectibles.clear();
+    game_scope.reset();
   }
 
   void run() {
@@ -65,6 +66,8 @@ struct App {
     for (auto& enemy : enemies) enemy.update(player.pos, map);
 
     map.update(player.pos);
+
+    game_scope.update(map);
 
     // Collision checks.
     for (auto& enemy : enemies) {
@@ -109,6 +112,8 @@ struct App {
 
     for (auto const& enemy : enemies) enemy.draw(map, player.pos);
     for (auto const& collectible : collectibles) collectible.draw(map);
+
+    game_scope.draw(map);
 
     player.draw(map);
   }

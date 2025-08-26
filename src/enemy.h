@@ -4,6 +4,7 @@
 
 #include "asset_manager.h"
 #include "common.h"
+#include "game_scope.h"
 #include "map.h"
 #include "particles.h"
 #include "raylib.h"
@@ -19,7 +20,9 @@ struct Enemy {
   float angle{};
   bool is_dead{false};
   TimedTask dying_lifetime{2.0};
+  RepeatedTask shooting_task{2.0, 2.0};
   ParticleManager particle_manager{};
+  float barrel_angle_rad{};
 
   Enemy(Vector2 _pos) : pos(_pos), move_target(_pos) {
     // The frame is derived from the image which is designed for turning.
@@ -34,16 +37,24 @@ struct Enemy {
       } else {
         update_movement_towards_target();
       }
+
+      barrel_angle_rad = abs_angle_of_points(pos, player_pos);
+
+      if (shooting_task.did_tick) {
+        Vector2 bullet_v{cosf(barrel_angle_rad) * BULLET_SPEED * GetFrameTime(),
+                         sinf(barrel_angle_rad) * BULLET_SPEED * GetFrameTime()};
+        game_scope.enemy_bullets.emplace_back(pos, bullet_v);
+      }
     }
 
     particle_manager.update();
+    shooting_task.update();
   }
 
   void draw(Map const &map, Vector2 const &player_pos) const {
     draw_texture(asset_manager.textures[ASSET_ENEMY_WHEEL_TEXTURE], Vector2Add(pos, map.world_offset), angle);
-
-    float player_angle = abs_angle_of_points(pos, player_pos) * RAD2DEG;
-    draw_texture(asset_manager.textures[ASSET_ENEMY_BARREL_TEXTURE], Vector2Add(pos, map.world_offset), player_angle);
+    draw_texture(asset_manager.textures[ASSET_ENEMY_BARREL_TEXTURE], Vector2Add(pos, map.world_offset),
+                 barrel_angle_rad * RAD2DEG);
 
     particle_manager.draw(map);
   }
@@ -55,7 +66,7 @@ struct Enemy {
     dying_lifetime.reset();
 
     for (int i = 0; i < 32; i++) {
-      float particle_angle = static_cast<float>((rand() % 360) * DEG2RAD);
+      float particle_angle = rand() % 360 * DEG2RAD;
       float particle_speed_jitter = static_cast<float>(rand() % 100) / 200.f + 0.75f;
       Vector2 v{cosf(particle_angle) * ENEMY_EXPLOSION_SPEED * GetFrameTime() * particle_speed_jitter,
                 sinf(particle_angle) * ENEMY_EXPLOSION_SPEED * GetFrameTime() * particle_speed_jitter};

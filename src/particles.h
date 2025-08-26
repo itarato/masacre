@@ -64,8 +64,9 @@ struct ExplosionParticle final : Particle {
     pos.x += v.x;
     pos.y += v.y;
 
-    v.x *= powf(0.99f, static_cast<float>(REFERENCE_FPS) / static_cast<float>(GetFPS()));
-    v.y *= powf(0.99f, static_cast<float>(REFERENCE_FPS) / static_cast<float>(GetFPS()));
+    float _fps_independent_multiplier = fps_independent_multiplier();
+    v.x *= powf(0.99f, _fps_independent_multiplier);
+    v.y *= powf(0.99f, _fps_independent_multiplier);
 
     if (lifetime.is_completed()) should_be_deleted = true;
   }

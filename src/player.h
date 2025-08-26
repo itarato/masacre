@@ -71,14 +71,13 @@ struct Player {
   }
 
   void draw(Map const &map) const {
+    // Draw main player.
     draw_texture(asset_manager.textures[ASSET_PLAYER_TEXTURE], screen_relative_center(map.world_offset), angle);
 
-    for (auto const &bullet : bullets) bullet.draw(map.world_offset);
+    // Draw all bullets.
+    for (auto const &bullet : bullets) bullet.draw(map);
 
-    // Debugging.
-    // DrawText(TextFormat("Player: %.2f:%.2f", pos.x, pos.y), 10, 70, 20, ORANGE);
-    // DrawText(map.is_hit(pos) ? "hit" : "miss", 10, 30, 20, ORANGE);
-
+    // Draw HUD.
     DrawRectangle(GetScreenWidth() - 144, GetScreenHeight() - 80, 140, 76, ColorAlpha(DARKGRAY, 0.9f));
 
     // Health bar.
@@ -98,6 +97,7 @@ struct Player {
     DrawTexture(asset_manager.textures[ASSET_ICON_FPS_TEXTURE], GetScreenWidth() - 140, GetScreenHeight() - 76, WHITE);
     DrawText(TextFormat("%d FPS", GetFPS()), GetScreenWidth() - 116, GetScreenHeight() - 76, 20, WHITE);
 
+    // Draw particles.
     particle_manager.draw(map);
   }
 
