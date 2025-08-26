@@ -25,6 +25,7 @@ struct Player {
   int kill_count{};
 
   ParticleManager particle_manager{};
+  RepeatedTask smoke_particle_scheduler{0.08};
 
   void init() {
     circle_frame_radius = asset_manager.textures[ASSET_PLAYER_TEXTURE].width / 2.f;
@@ -52,9 +53,10 @@ struct Player {
     std::erase_if(bullets, [](auto e) { return e.is_dead; });
     for (auto &bullet : bullets) bullet.update(map);
 
-    particle_manager.particles.push_back(std::make_unique<SmokeParticle>(pos));
-
     particle_manager.update();
+    smoke_particle_scheduler.update();
+
+    if (smoke_particle_scheduler.did_tick) particle_manager.particles.push_back(std::make_unique<SmokeParticle>(pos));
   }
 
   void draw(Map const &map) const {

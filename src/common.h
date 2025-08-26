@@ -57,6 +57,25 @@ struct PFCell {
   }
 };
 
+struct RepeatedTask {
+  double interval_seconds;
+  double last_tick{0.0};
+  bool did_tick{false};
+
+  explicit RepeatedTask(double _interval_seconds) : interval_seconds(_interval_seconds) {
+  }
+
+  void update() {
+    did_tick = false;
+
+    const double time = GetTime();
+    if (last_tick + interval_seconds < time) {
+      did_tick = true;
+      last_tick += interval_seconds;
+    }
+  }
+};
+
 constexpr Vector2 point_move_with_angle_and_distance(Vector2 p, float angle_rad, float dist) {
   return Vector2{p.x + cosf(angle_rad) * dist, p.y + sinf(angle_rad) * dist};
 }
