@@ -21,6 +21,9 @@ struct AssetManager {
     textures[ASSET_ENEMY_TEXTURE] = LoadTexture("./assets/images/enemy_00.png");
     textures[ASSET_COLLECTIBLE_HEALTH_TEXTURE] = LoadTexture("./assets/images/health_00.png");
     textures[ASSET_COLLECTIBLE_BULLET_TEXTURE] = LoadTexture("./assets/images/bullet_00.png");
+    textures[ASSET_ICON_HEALTH_TEXTURE] = LoadTexture("./assets/images/icon_health.png");
+    textures[ASSET_ICON_BULLET_TEXTURE] = LoadTexture("./assets/images/icon_bullet.png");
+    textures[ASSET_ICON_FPS_TEXTURE] = LoadTexture("./assets/images/icon_fps.png");
 
     images[ASSET_MAP_IMAGE] = LoadImage("./assets/images/map_0.png");
   }

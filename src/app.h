@@ -110,8 +110,6 @@ struct App {
     for (auto const& collectible : collectibles) collectible.draw(map);
 
     player.draw(map);
-
-    DrawFPS(10, 10);
   }
 
  private:

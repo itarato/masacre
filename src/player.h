@@ -64,12 +64,29 @@ struct Player {
 
     for (auto const &bullet : bullets) bullet.draw(map.world_offset);
 
-    DrawText(TextFormat("Player: %.2f:%.2f", pos.x, pos.y), 10, 70, 20, ORANGE);
-    DrawText(map.is_hit(pos) ? "hit" : "miss", 10, 30, 20, ORANGE);
+    // Debugging.
+    // DrawText(TextFormat("Player: %.2f:%.2f", pos.x, pos.y), 10, 70, 20, ORANGE);
+    // DrawText(map.is_hit(pos) ? "hit" : "miss", 10, 30, 20, ORANGE);
 
-    DrawRectangle(0, GetScreenHeight() - 22, GetScreenWidth(), 22, DARKGRAY);
-    DrawText(TextFormat("[ Health: %d ][ Ammo: %d ][ Kills: %d ]", health, bullet_count, kill_count), 10,
-             GetScreenHeight() - 20, 20, RAYWHITE);
+    DrawRectangle(GetScreenWidth() - 144, GetScreenHeight() - 80, 140, 76, ColorAlpha(DARKGRAY, 0.9f));
+
+    // Health bar.
+    DrawRectangle(GetScreenWidth() - 112, GetScreenHeight() - 24,
+                  (static_cast<float>(health) / PLAYER_MAX_HEALTH) * 100.f, 12, RED);
+    DrawRectangleLinesEx(
+        Rectangle{static_cast<float>(GetScreenWidth() - 116), static_cast<float>(GetScreenHeight() - 28), 108.f, 20.f},
+        2.f, WHITE);
+    DrawTexture(asset_manager.textures[ASSET_ICON_HEALTH_TEXTURE], GetScreenWidth() - 140, GetScreenHeight() - 28,
+                WHITE);
+
+    // Bullet bar.
+    DrawTexture(asset_manager.textures[ASSET_ICON_BULLET_TEXTURE], GetScreenWidth() - 140, GetScreenHeight() - 52,
+                WHITE);
+    DrawText(TextFormat("%d", bullet_count), GetScreenWidth() - 116, GetScreenHeight() - 52, 20, WHITE);
+
+    // FPS bar.
+    DrawTexture(asset_manager.textures[ASSET_ICON_FPS_TEXTURE], GetScreenWidth() - 140, GetScreenHeight() - 76, WHITE);
+    DrawText(TextFormat("%d FPS", GetFPS()), GetScreenWidth() - 116, GetScreenHeight() - 76, 20, WHITE);
 
     particle_manager.draw(map);
   }

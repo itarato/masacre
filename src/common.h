@@ -5,8 +5,8 @@
 #include "raylib.h"
 #include "raymath.h"
 
-const int WINDOW_W = 1000;
-const int WINDOW_H = 1000;
+constexpr int WINDOW_W = 1000;
+constexpr int WINDOW_H = 1000;
 
 #define PLAYER_SPEED 400.f
 #define PLAYER_ANGLE_SPEED 300.f
@@ -24,6 +24,9 @@ const int WINDOW_H = 1000;
 #define ASSET_ENEMY_TEXTURE 2
 #define ASSET_COLLECTIBLE_HEALTH_TEXTURE 3
 #define ASSET_COLLECTIBLE_BULLET_TEXTURE 4
+#define ASSET_ICON_HEALTH_TEXTURE 5
+#define ASSET_ICON_BULLET_TEXTURE 6
+#define ASSET_ICON_FPS_TEXTURE 7
 
 #define ASSET_MAP_IMAGE 0
 
