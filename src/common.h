@@ -30,6 +30,8 @@ constexpr int WINDOW_H = 1000;
 
 #define ASSET_MAP_IMAGE 0
 
+#define REFERENCE_FPS 144
+
 struct IntVector2 {
   int x{};
   int y{};
@@ -57,6 +59,17 @@ struct PFCell {
 
   constexpr bool operator>(const PFCell &other) const {
     return total() > other.total();
+  }
+};
+
+struct TimedTask {
+  double lifetime_end;
+
+  TimedTask(double lifetime_seconds) : lifetime_end(GetTime() + lifetime_seconds) {
+  }
+
+  bool is_completed() const {
+    return GetTime() > lifetime_end;
   }
 };
 

@@ -24,12 +24,12 @@ struct Particle {
 };
 
 struct SmokeParticle final : Particle {
-  double lifetime_end{};
+  TimedTask lifetime;
   float radius{2.0f};
   float jitter;
   float alpha{0.2f};
 
-  explicit SmokeParticle(Vector2 const _pos) : Particle(_pos), lifetime_end(GetTime() + 2.0) {
+  explicit SmokeParticle(Vector2 const _pos) : Particle(_pos), lifetime(1.6) {
     jitter = static_cast<float>(rand() % 628) / 100.f;
   }
   ~SmokeParticle() override = default;
@@ -43,8 +43,29 @@ struct SmokeParticle final : Particle {
     radius += GetFrameTime() * 10.f;
     alpha -= GetFrameTime() * 0.1f;
 
-    if (GetTime() > lifetime_end) is_dead = true;
+    if (lifetime.is_completed()) is_dead = true;
   };
+};
+
+struct Explosion final : Particle {
+  Vector2 v{};
+  TimedTask lifetime;
+
+  Explosion(Vector2 _pos, Vector2 _v) : Particle(_pos), v(_v), lifetime(2.0) {
+  }
+
+  void draw(Map const &map) const override {
+    DrawCircleV(Vector2Add(pos, map.world_offset), 10.f, GOLD);
+  };
+  void update() override {
+    pos.x += v.x;
+    pos.y += v.y;
+
+    v.x *= powf(0.99f, static_cast<float>(REFERENCE_FPS) / static_cast<float>(GetFPS()));
+    v.y *= powf(0.99f, static_cast<float>(REFERENCE_FPS) / static_cast<float>(GetFPS()));
+
+    if (lifetime.is_completed()) is_dead = true;
+  }
 };
 
 struct ParticleManager {
