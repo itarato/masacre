@@ -107,7 +107,7 @@ struct App {
   void draw() const {
     map.draw();
 
-    for (auto const& enemy : enemies) enemy.draw(map);
+    for (auto const& enemy : enemies) enemy.draw(map, player.pos);
     for (auto const& collectible : collectibles) collectible.draw(map);
 
     player.draw(map);

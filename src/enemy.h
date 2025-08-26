@@ -22,7 +22,9 @@ struct Enemy {
   ParticleManager particle_manager{};
 
   Enemy(Vector2 _pos) : pos(_pos), move_target(_pos) {
-    circle_frame_radius = asset_manager.textures[ASSET_ENEMY_TEXTURE].width / 2.f;
+    // The frame is derived from the image which is designed for turning.
+    // Once the turning works, let's reduce the wheel size so we can use it to assume a frame size.
+    circle_frame_radius = asset_manager.textures[ASSET_ENEMY_WHEEL_TEXTURE].width / 3.f;
   }
 
   void update(Vector2 const &player_pos, Map const &map) {
@@ -37,8 +39,12 @@ struct Enemy {
     particle_manager.update();
   }
 
-  void draw(Map const &map) const {
-    draw_texture(asset_manager.textures[ASSET_ENEMY_TEXTURE], Vector2Add(pos, map.world_offset), angle);
+  void draw(Map const &map, Vector2 const &player_pos) const {
+    draw_texture(asset_manager.textures[ASSET_ENEMY_WHEEL_TEXTURE], Vector2Add(pos, map.world_offset), angle);
+
+    float player_angle = abs_angle_of_points(pos, player_pos) * RAD2DEG;
+    draw_texture(asset_manager.textures[ASSET_ENEMY_BARREL_TEXTURE], Vector2Add(pos, map.world_offset), player_angle);
+
     particle_manager.draw(map);
   }
 

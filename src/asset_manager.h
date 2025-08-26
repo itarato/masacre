@@ -18,7 +18,8 @@ struct AssetManager {
   void init() {
     textures[ASSET_PLAYER_TEXTURE] = LoadTexture("./assets/images/player_00.png");
     textures[ASSET_MAP_TEXTURE] = LoadTexture("./assets/images/map_0.png");
-    textures[ASSET_ENEMY_TEXTURE] = LoadTexture("./assets/images/enemy_00.png");
+    textures[ASSET_ENEMY_WHEEL_TEXTURE] = LoadTexture("./assets/images/enemy_wheel.png");
+    textures[ASSET_ENEMY_BARREL_TEXTURE] = LoadTexture("./assets/images/enemy_barrel.png");
     textures[ASSET_COLLECTIBLE_HEALTH_TEXTURE] = LoadTexture("./assets/images/health_00.png");
     textures[ASSET_COLLECTIBLE_BULLET_TEXTURE] = LoadTexture("./assets/images/bullet_00.png");
     textures[ASSET_ICON_HEALTH_TEXTURE] = LoadTexture("./assets/images/icon_health.png");

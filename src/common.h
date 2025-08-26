@@ -21,12 +21,13 @@ constexpr int WINDOW_H = 1000;
 
 #define ASSET_PLAYER_TEXTURE 0
 #define ASSET_MAP_TEXTURE 1
-#define ASSET_ENEMY_TEXTURE 2
+#define ASSET_ENEMY_WHEEL_TEXTURE 2
 #define ASSET_COLLECTIBLE_HEALTH_TEXTURE 3
 #define ASSET_COLLECTIBLE_BULLET_TEXTURE 4
 #define ASSET_ICON_HEALTH_TEXTURE 5
 #define ASSET_ICON_BULLET_TEXTURE 6
 #define ASSET_ICON_FPS_TEXTURE 7
+#define ASSET_ENEMY_BARREL_TEXTURE 8
 
 #define ASSET_MAP_IMAGE 0
 
@@ -125,8 +126,8 @@ constexpr IntVector2 cell_idx_from_coord(Vector2 const &p) {
   return IntVector2{(int)roundf(p.x / CELL_DISTANCE), (int)roundf(p.y / CELL_DISTANCE)};
 }
 
-void draw_texture(Texture2D const &texture, Vector2 const &pos, float angle) {
+void draw_texture(Texture2D const &texture, Vector2 const &pos, float angle_deg) {
   DrawTexturePro(texture, {0.f, 0.f, (float)texture.width, (float)texture.height},
                  {pos.x, pos.y, (float)texture.width, (float)texture.height},
-                 Vector2{texture.width / 2.f, texture.height / 2.f}, angle, WHITE);
+                 Vector2{texture.width / 2.f, texture.height / 2.f}, angle_deg, WHITE);
 }
