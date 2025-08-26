@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "asset_manager.h"
@@ -38,6 +39,7 @@ struct Player {
     health = PLAYER_MAX_HEALTH;
     kill_count = 0;
     _is_dead = false;
+    particle_manager.reset();
   }
 
   void update(Map const &map) {
@@ -50,7 +52,7 @@ struct Player {
     std::erase_if(bullets, [](auto e) { return e.is_dead; });
     for (auto &bullet : bullets) bullet.update(map);
 
-    particle_manager.particles.push_back(SmokeParticle(pos));
+    particle_manager.particles.push_back(std::make_unique<SmokeParticle>(pos));
 
     particle_manager.update();
   }
