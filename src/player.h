@@ -7,6 +7,7 @@
 #include "collectibles.h"
 #include "common.h"
 #include "map.h"
+#include "particles.h"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -21,6 +22,8 @@ struct Player {
   int bullet_count{};
   int health{};
   int kill_count{};
+
+  ParticleManager particle_manager{};
 
   void init() {
     circle_frame_radius = asset_manager.textures[ASSET_PLAYER_TEXTURE].width / 2.f;
@@ -46,6 +49,10 @@ struct Player {
 
     std::erase_if(bullets, [](auto e) { return e.is_dead; });
     for (auto &bullet : bullets) bullet.update(map);
+
+    particle_manager.particles.push_back(SmokeParticle(pos));
+
+    particle_manager.update();
   }
 
   void draw(Map const &map) const {
@@ -59,6 +66,8 @@ struct Player {
     DrawRectangle(0, GetScreenHeight() - 22, GetScreenWidth(), 22, DARKGRAY);
     DrawText(TextFormat("[ Health: %d ][ Ammo: %d ][ Kills: %d ]", health, bullet_count, kill_count), 10,
              GetScreenHeight() - 20, 20, RAYWHITE);
+
+    particle_manager.draw(map);
   }
 
   void update_rotation() {

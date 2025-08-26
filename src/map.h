@@ -11,8 +11,6 @@ struct Map {
   Image map_image;
   PathFinder path_finder{};
 
-  Map() {
-  }
   ~Map() {
     UnloadTexture(map_texture);
     UnloadImage(map_image);
@@ -72,7 +70,7 @@ struct Map {
 
     for (int y = 0; y <= path_finder.cells_h; y++) {
       for (int x = 0; x <= path_finder.cells_w; x++) {
-        if (is_hit(Vector2{(float)(x * CELL_DISTANCE), (float)(y * CELL_DISTANCE)})) {
+        if (is_hit(Vector2{static_cast<float>(x * CELL_DISTANCE), static_cast<float>(y * CELL_DISTANCE)})) {
           path_finder.cells[y * path_finder.cells_w + x] = 0;
         } else {
           path_finder.cells[y * path_finder.cells_w + x] = PF_CELL_ACCESSIBLE_FLAG;
