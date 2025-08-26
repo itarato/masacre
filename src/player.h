@@ -21,7 +21,7 @@ struct Player {
   std::vector<Bullet> bullets{};
 
   int bullet_count{};
-  int health{};
+  float health{};
   int kill_count{};
 
   ParticleManager particle_manager{};
@@ -71,8 +71,7 @@ struct Player {
     DrawRectangle(GetScreenWidth() - 144, GetScreenHeight() - 80, 140, 76, ColorAlpha(DARKGRAY, 0.9f));
 
     // Health bar.
-    DrawRectangle(GetScreenWidth() - 112, GetScreenHeight() - 24,
-                  (static_cast<float>(health) / PLAYER_MAX_HEALTH) * 100.f, 12, RED);
+    DrawRectangle(GetScreenWidth() - 112, GetScreenHeight() - 24, (health / PLAYER_MAX_HEALTH) * 100.f, 12, RED);
     DrawRectangleLinesEx(
         Rectangle{static_cast<float>(GetScreenWidth() - 116), static_cast<float>(GetScreenHeight() - 28), 108.f, 20.f},
         2.f, WHITE);
@@ -150,15 +149,10 @@ struct Player {
     pos.y += sinf(abs_angle) * PLAYER_SPEED * GetFrameTime();
   }
 
-  void hurt() {
-    if (constexpr int hurt_val = 1; health > hurt_val) {
-      //  TODO: This is frame rate dependent. Add 1s sleep.
-      health -= hurt_val;
-    } else {
-      health = 0;
-    }
+  void hurt(float hurt_val) {
+    health -= hurt_val * GetFrameTime();
 
-    if (health == 0) {
+    if (health <= 0) {
       _is_dead = true;
     }
   }

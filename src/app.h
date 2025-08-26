@@ -9,6 +9,7 @@
 #include "common.h"
 #include "enemy.h"
 #include "map.h"
+#include "particles.h"
 #include "player.h"
 #include "raylib.h"
 
@@ -76,7 +77,7 @@ struct App {
       }
 
       if (CheckCollisionCircles(player.pos, player.circle_frame_radius, enemy.pos, enemy.circle_frame_radius)) {
-        player.hurt();
+        player.hurt(enemy.attack_damage());
       }
     }
 

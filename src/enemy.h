@@ -38,6 +38,10 @@ struct Enemy {
     is_dead = true;
   }
 
+  float attack_damage() const {
+    return 10;
+  }
+
  private:
   void update_move_target(Vector2 const &player_pos, Map const &map) {
     auto path = map.path_finder.find_path(pos, player_pos);

@@ -57,6 +57,7 @@ struct Explosion final : Particle {
   void draw(Map const &map) const override {
     DrawCircleV(Vector2Add(pos, map.world_offset), 10.f, GOLD);
   };
+
   void update() override {
     pos.x += v.x;
     pos.y += v.y;
