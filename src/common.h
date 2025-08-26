@@ -12,6 +12,9 @@ constexpr int WINDOW_H = 1000;
 #define CELL_DISTANCE 50
 #define REFERENCE_FPS 144
 
+/**
+ * Returns a random between 0.0 and 1.0 (both included).
+ */
 float randf() {
   return static_cast<float>(rand() % 1001) / 1000.0;
 }
@@ -65,17 +68,17 @@ struct TimedTask {
 
 struct RepeatedTask {
   double interval_seconds;
-  double last_tick{0.0};
   bool did_tick{false};
   bool is_paused{false};
   double additional_jitter{0.f};
   double current_jitter{0.f};
+  double last_tick;
 
-  explicit RepeatedTask(double _interval_seconds) : interval_seconds(_interval_seconds) {
+  explicit RepeatedTask(double _interval_seconds) : interval_seconds(_interval_seconds), last_tick(GetTime()) {
   }
 
   explicit RepeatedTask(double _interval_seconds, double _additional_jitter)
-      : interval_seconds(_interval_seconds), additional_jitter(_additional_jitter) {
+      : interval_seconds(_interval_seconds), additional_jitter(_additional_jitter), last_tick(GetTime()) {
   }
 
   void pause() {

@@ -30,9 +30,9 @@ struct App {
     InitWindow(WINDOW_W, WINDOW_H, "Masacre");
     SetTargetFPS(GetMonitorRefreshRate(0));
 
+    asset_manager.init();
     player.init();
     map.init();
-    asset_manager.init();
 
     reset();
   }
@@ -67,7 +67,7 @@ struct App {
 
     map.update(player.pos);
 
-    game_scope.update(map);
+    game_scope.update(map, player);
 
     // Collision checks.
     for (auto& enemy : enemies) {

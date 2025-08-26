@@ -15,12 +15,31 @@ struct Particle {
   Vector2 pos{};
   bool should_be_deleted{false};
 
+  Particle() {
+  }
   explicit Particle(Vector2 _pos) : pos(_pos) {
   }
   virtual ~Particle() {};
 
   virtual void draw(Map const &map) const = 0;
   virtual void update() = 0;
+};
+
+struct ParticleManager {
+  std::list<std::unique_ptr<Particle>> particles{};
+
+  void update() {
+    for (auto &particle : particles) particle->update();
+    std::erase_if(particles, [](auto const &e) { return e->should_be_deleted; });
+  }
+
+  void draw(Map const &map) const {
+    for (auto const &particle : particles) particle->draw(map);
+  }
+
+  void reset() {
+    particles.clear();
+  }
 };
 
 struct SmokeParticle final : Particle {
@@ -72,19 +91,71 @@ struct ExplosionParticle final : Particle {
   }
 };
 
-struct ParticleManager {
-  std::list<std::unique_ptr<Particle>> particles{};
+struct StraightLineParticle final : Particle {
+  float angle_rad{};
+  float speed{};
+  TimedTask lifetime;
+  float size{6.f};
+  float speed_multiplier{1.0};
+  Color color{GOLD};
 
-  void update() {
-    for (auto &particle : particles) particle->update();
-    std::erase_if(particles, [](auto const &e) { return e->should_be_deleted; });
+  StraightLineParticle(Vector2 _pos, float _angle_rad, float _speed, double _lifetime)
+      : Particle(_pos), angle_rad(_angle_rad), speed(_speed), lifetime(_lifetime) {
   }
 
-  void draw(Map const &map) const {
-    for (auto const &particle : particles) particle->draw(map);
+  void draw(Map const &map) const override {
+    DrawCircleV(Vector2Add(pos, map.world_offset), size, color);
+  };
+
+  void update() override {
+    pos.x += cosf(angle_rad) * speed * GetFrameTime();
+    pos.y += sinf(angle_rad) * speed * GetFrameTime();
+
+    if (speed_multiplier) speed *= powf(speed_multiplier, fps_independent_multiplier());
+
+    if (lifetime.is_completed()) should_be_deleted = true;
+  }
+};
+
+struct BurnParticleGroup final : Particle {
+  Vector2 *player_pos;
+  TimedTask lifetime{1.0};
+  RepeatedTask particle_repeater{0.02};
+  ParticleManager particle_manager{};
+
+  BurnParticleGroup(Vector2 *_player_pos) : Particle(), player_pos(_player_pos) {
   }
 
-  void reset() {
-    particles.clear();
+  void update() override {
+    if (lifetime.is_completed()) should_be_deleted = true;
+
+    particle_manager.update();
+    particle_repeater.update();
+
+    if (particle_repeater.did_tick) {
+      float angle_rad = (230 + rand() % 80) * DEG2RAD;
+      auto particle = std::make_unique<StraightLineParticle>(*player_pos, angle_rad, 400.f, 0.5);
+      particle->speed_multiplier = 0.95f;
+      particle->size = 2.f;
+      switch (rand() % 5) {
+        case 0:
+          particle->color = YELLOW;
+          break;
+        case 1:
+          particle->color = ORANGE;
+          break;
+        case 2:
+          particle->color = DARKGRAY;
+          break;
+        default:
+          particle->color = RED;
+          break;
+      }
+      particle_manager.particles.push_back(std::move(particle));
+    }
+  }
+
+  void draw(Map const &map) const override {
+    particle_manager.draw(map);
   }
 };

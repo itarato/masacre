@@ -81,9 +81,9 @@ struct Enemy {
   }
 
   float attack_damage() {
-    if (is_dead) return 0;
+    if (is_dead) return 0.f;
 
-    return 10;
+    return 10.f * GetFrameTime();
   }
 
  private:

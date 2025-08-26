@@ -165,7 +165,7 @@ struct Player {
   }
 
   void hurt(float hurt_val) {
-    health -= hurt_val * GetFrameTime();
+    health -= hurt_val;
 
     if (health <= 0) {
       _should_be_deleted = true;

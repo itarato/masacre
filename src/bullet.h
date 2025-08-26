@@ -38,4 +38,8 @@ struct Bullet {
   void kill() {
     should_be_deleted = true;
   }
+
+  float attach_damage() const {
+    return 10.0f;
+  }
 };
