@@ -75,11 +75,11 @@ struct Player {
   }
 
   void draw(Map const &map) const {
-    // Draw main player.
-    draw_texture(asset_manager.textures[ASSET_PLAYER_TEXTURE], screen_relative_center(map.world_offset), angle);
-
     // Draw all bullets.
     for (auto const &bullet : bullets) bullet.draw(map);
+
+    // Draw main player.
+    draw_texture(asset_manager.textures[ASSET_PLAYER_TEXTURE], screen_relative_center(map.world_offset), angle);
 
     // Draw HUD.
     DrawRectangle(GetScreenWidth() - 144, GetScreenHeight() - 80, 140, 76, ColorAlpha(DARKGRAY, 0.9f));
@@ -108,10 +108,15 @@ struct Player {
   void update_rotation() {
     if (IsKeyDown(KEY_LEFT)) angle -= PLAYER_ANGLE_SPEED * GetFrameTime();
     if (IsKeyDown(KEY_RIGHT)) angle += PLAYER_ANGLE_SPEED * GetFrameTime();
+
+    float turn_axis = GetGamepadAxisMovement(0, 0);
+    if (turn_axis != 0.f) angle += PLAYER_ANGLE_SPEED * GetFrameTime() * turn_axis;
   }
 
   void update_shooting() {
-    if (IsKeyPressed(KEY_LEFT_CONTROL) && bullet_count > 0) {
+    if (bullet_count <= 0) return;
+
+    if (IsKeyPressed(KEY_LEFT_CONTROL) || IsGamepadButtonPressed(0, 7)) {
       bullet_count--;
 
       float bullet_angle_rad = angle * DEG2RAD;
@@ -124,11 +129,20 @@ struct Player {
   void update_movement(Map const &map) {
     Vector2 old_pos = *pos;
 
-    if (IsKeyDown(KEY_UP)) move_to_relative_direction(0.f);
-    if (IsKeyDown(KEY_DOWN)) move_to_relative_direction(PI);
+    if (IsKeyDown(KEY_UP)) move_to_relative_direction(0.f, 1.f);
+    if (IsKeyDown(KEY_DOWN)) move_to_relative_direction(PI, 1.f);
 
-    if (IsKeyDown(KEY_A)) move_to_relative_direction(-PI / 2.f);
-    if (IsKeyDown(KEY_D)) move_to_relative_direction(PI / 2.f);
+    if (IsKeyDown(KEY_A)) move_to_relative_direction(-PI / 2.f, 1.f);
+    if (IsKeyDown(KEY_D)) move_to_relative_direction(PI / 2.f, 1.f);
+
+    float move_vertical_axis_fwd = GetGamepadAxisMovement(0, 5);
+    if (move_vertical_axis_fwd > -1.f) move_to_relative_direction(0.f, (move_vertical_axis_fwd + 1.f) / 2.f);
+
+    float move_vertical_axis_bwd = GetGamepadAxisMovement(0, 4);
+    if (move_vertical_axis_bwd > -1.f) move_to_relative_direction(PI, (move_vertical_axis_bwd + 1.f) / 2.f);
+
+    float move_horizontal_axis = GetGamepadAxisMovement(0, 2);
+    if (move_horizontal_axis != 0.f) move_to_relative_direction(-PI / 2.f, -move_horizontal_axis / 2.f);
 
     if (!Vector2Equals(*pos, old_pos) && map.is_hit(*pos)) {
       float move_angle_rad = abs_angle_of_points(old_pos, *pos);
@@ -158,10 +172,10 @@ struct Player {
     return Vector2Add(*pos, world_offset);
   }
 
-  void move_to_relative_direction(const float rel_rad_angle) {
+  void move_to_relative_direction(const float rel_rad_angle, float rate) {
     const float abs_angle = (angle * DEG2RAD) + rel_rad_angle;
-    pos->x += cosf(abs_angle) * PLAYER_SPEED * GetFrameTime();
-    pos->y += sinf(abs_angle) * PLAYER_SPEED * GetFrameTime();
+    pos->x += cosf(abs_angle) * PLAYER_SPEED * GetFrameTime() * rate;
+    pos->y += sinf(abs_angle) * PLAYER_SPEED * GetFrameTime() * rate;
   }
 
   void hurt(float hurt_val) {

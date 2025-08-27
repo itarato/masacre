@@ -1,5 +1,6 @@
 #pragma once
 
+#include "asset_manager.h"
 #include "map.h"
 #include "raylib.h"
 #include "raymath.h"
@@ -8,12 +9,15 @@ struct Bullet {
   Vector2 pos{};
   Vector2 v{};
   bool should_be_deleted{false};
+  float angle_deg{};
 
   Bullet(Vector2 _pos, Vector2 _v) : pos(_pos), v(_v) {
+    angle_deg = abs_angle_of_points(Vector2(), v) * RAD2DEG;
   }
 
   void draw(Map const &map) const {
-    DrawCircleV(get_rel_pos(map.world_offset), 4.f, DARKGREEN);
+    // DrawCircleV(get_rel_pos(map.world_offset), 4.f, DARKGREEN);
+    draw_texture(asset_manager.textures[ASSET_BULLET_TEXTURE], Vector2Add(pos, map.world_offset), angle_deg);
   }
 
   void update(Map const &map) {

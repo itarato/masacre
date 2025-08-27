@@ -8,6 +8,8 @@ Bugs:
   immobility
 - (similar) player close to edge/hit can get its cell-coords rounded to the dead zone - same result
 - enemies can overlap each other
+- player can get spawn (center) on a hit zone
+- enemy/collectible can be spawned on a surrounded zone
 
 Missing:
 

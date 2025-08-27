@@ -5,8 +5,8 @@
 #include "raylib.h"
 #include "raymath.h"
 
-constexpr int WINDOW_W = 1000;
-constexpr int WINDOW_H = 1000;
+constexpr int WINDOW_W = 800;
+constexpr int WINDOW_H = 800;
 
 #define BULLET_SPEED 800.f
 #define CELL_DISTANCE 50

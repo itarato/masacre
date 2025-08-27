@@ -13,9 +13,9 @@
 #include "player.h"
 #include "raylib.h"
 
-#define ENEMY_SPAWN_COUNT 5
-#define MAX_COLLECTIBLE_HEALTH_COUNT 2
-#define MAX_COLLECTIBLE_BULLET_COUNT 4
+#define ENEMY_SPAWN_COUNT 6
+#define MAX_COLLECTIBLE_HEALTH_COUNT 1
+#define MAX_COLLECTIBLE_BULLET_COUNT 5
 
 struct App {
   Player player{};
@@ -59,7 +59,7 @@ struct App {
   }
 
   void update() {
-    if (IsKeyPressed(KEY_R)) reset();
+    if (IsKeyPressed(KEY_R) || IsGamepadButtonPressed(0, 5)) reset();
 
     player.update(map);
 
