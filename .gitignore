@@ -4,3 +4,5 @@ src/*.o
 src/tests/*.o
 .vscode
 .idea
+misc/MasacreMapgen/*.png
+
