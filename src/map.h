@@ -1,5 +1,6 @@
 #pragma once
 
+#include "asset_manager.h"
 #include "common.h"
 #include "path_finder.h"
 #include "raylib.h"
@@ -9,27 +10,17 @@
 
 struct Map {
   Vector2 world_offset{};
-  Texture2D map_texture;
-  Image map_image;
   PathFinder path_finder{};
 
-  ~Map() {
-    UnloadTexture(map_texture);
-    UnloadImage(map_image);
-  }
-
   void init() {
-    map_texture = LoadTexture("./assets/images/map_0.png");
-    map_image = LoadImage("./assets/images/map_0.png");
-
     path_finder_init();
 
     reset();
   }
 
   void reset() {
-    world_offset.x = -(map_image.width - GetScreenWidth()) / 2.f;
-    world_offset.y = -(map_image.height - GetScreenHeight()) / 2.f;
+    world_offset.x = -(asset_manager.images[ASSET_MAP_IMAGE].width - GetScreenWidth()) / 2.f;
+    world_offset.y = -(asset_manager.images[ASSET_MAP_IMAGE].height - GetScreenHeight()) / 2.f;
   }
 
   void update(Vector2 const& player_pos) {
@@ -37,7 +28,7 @@ struct Map {
   }
 
   void draw() const {
-    DrawTextureV(map_texture, world_offset, WHITE);
+    DrawTextureV(asset_manager.textures[ASSET_MAP_TEXTURE], world_offset, WHITE);
   }
 
   void update_world_offset(Vector2 player_pos) {
@@ -58,12 +49,12 @@ struct Map {
 
   bool is_hit(Vector2 point) const {
     // TraceLog(LOG_INFO, "Col: %d", GetImageColor(map_image, point_abs_adjusted.x, point_abs_adjusted.y).r);
-    return GetImageColor(map_image, point.x, point.y).r < 255;
+    return GetImageColor(asset_manager.images[ASSET_MAP_IMAGE], point.x, point.y).r < 255;
   }
 
   void path_finder_init() {
-    path_finder.cells_w = map_image.width / CELL_DISTANCE;
-    path_finder.cells_h = map_image.height / CELL_DISTANCE;
+    path_finder.cells_w = asset_manager.images[ASSET_MAP_IMAGE].width / CELL_DISTANCE;
+    path_finder.cells_h = asset_manager.images[ASSET_MAP_IMAGE].height / CELL_DISTANCE;
 
     if (path_finder.cells_w * path_finder.cells_w >= MAX_GRID_CELLS) {
       TraceLog(LOG_ERROR, "Map too large");
@@ -79,5 +70,13 @@ struct Map {
         }
       }
     }
+  }
+
+  int width() const {
+    return asset_manager.images[ASSET_MAP_IMAGE].width;
+  }
+
+  int height() const {
+    return asset_manager.images[ASSET_MAP_IMAGE].height;
   }
 };

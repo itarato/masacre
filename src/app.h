@@ -131,7 +131,7 @@ struct App {
     Vector2 pos;
 
     while (true) {
-      pos = Vector2{(float)(rand() % map.map_image.width), (float)(rand() % map.map_image.height)};
+      pos = Vector2{(float)(rand() % map.width()), (float)(rand() % map.height())};
 
       if (!map.is_hit(pos)) return pos;
     }
