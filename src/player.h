@@ -132,6 +132,8 @@ struct Player {
       Vector2 bullet_v{cosf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime(),
                        sinf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime()};
       bullets.emplace_back(*pos, bullet_v);
+
+      PlaySound(asset_manager.sounds[ASSET_SOUND_PLAYER_SHOOT]);
     }
   }
 

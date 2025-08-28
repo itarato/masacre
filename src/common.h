@@ -100,7 +100,7 @@ struct RepeatedTask {
 
     if (last_tick + interval_seconds + current_jitter < GetTime()) {
       did_tick = true;
-      last_tick += interval_seconds + current_jitter;
+      last_tick = GetTime();
 
       if (additional_jitter > 0.f) {
         current_jitter = randf() * additional_jitter;

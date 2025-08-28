@@ -20,13 +20,19 @@
 
 #define ASSET_MAP_IMAGE 0
 
+#define ASSET_SOUND_PLAYER_SHOOT 0
+#define ASSET_SOUND_ENEMY_SHOOT 1
+#define ASSET_SOUND_PICKUP 2
+
 struct AssetManager {
   std::unordered_map<int, Texture2D> textures{};
   std::unordered_map<int, Image> images{};
+  std::unordered_map<int, Sound> sounds{};
 
   ~AssetManager() {
     for (auto const& kv : textures) UnloadTexture(kv.second);
     for (auto const& kv : images) UnloadImage(kv.second);
+    for (auto const& kv : sounds) UnloadSound(kv.second);
   }
 
   void init() {
@@ -43,6 +49,13 @@ struct AssetManager {
     textures[ASSET_ICON_KILLS_TEXTURE] = LoadTexture("./assets/images/icon_kills.png");
 
     images[ASSET_MAP_IMAGE] = LoadImage("./assets/images/map_image.png");
+
+    sounds[ASSET_SOUND_PLAYER_SHOOT] = LoadSound("./assets/sounds/player_shoot.mp3");
+    SetSoundVolume(sounds[ASSET_SOUND_PLAYER_SHOOT], 0.8f);
+    sounds[ASSET_SOUND_ENEMY_SHOOT] = LoadSound("./assets/sounds/enemy_shoot.mp3");
+    SetSoundVolume(sounds[ASSET_SOUND_ENEMY_SHOOT], 0.4f);
+    sounds[ASSET_SOUND_PICKUP] = LoadSound("./assets/sounds/pickup.mp3");
+    SetSoundVolume(sounds[ASSET_SOUND_PICKUP], 0.9f);
   }
 };
 

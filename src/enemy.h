@@ -48,6 +48,8 @@ struct Enemy {
         Vector2 bullet_v{cosf(barrel_angle_rad + aim_jitter_rad) * BULLET_SPEED * GetFrameTime(),
                          sinf(barrel_angle_rad + aim_jitter_rad) * BULLET_SPEED * GetFrameTime()};
         game_scope.enemy_bullets.emplace_back(pos, bullet_v);
+
+        PlaySound(asset_manager.sounds[ASSET_SOUND_ENEMY_SHOOT]);
       }
     }
 

@@ -32,6 +32,7 @@ struct App {
 
     SetConfigFlags(FLAG_WINDOW_HIGHDPI);
     InitWindow(WINDOW_W, WINDOW_H, "Masacre");
+    InitAudioDevice();
     SetTargetFPS(GetMonitorRefreshRate(0));
 
     asset_manager.init();
@@ -97,6 +98,8 @@ struct App {
                                 player.circle_frame_radius)) {
         collectible.should_be_deleted = true;
         player.consume(collectible);
+
+        PlaySound(asset_manager.sounds[ASSET_SOUND_PICKUP]);
       }
     }
 
