@@ -14,7 +14,7 @@
 #include "player.h"
 #include "raylib.h"
 
-#define ENEMY_SPAWN_COUNT 10
+#define ENEMY_SPAWN_COUNT 6
 #define MAX_COLLECTIBLE_HEALTH_COUNT 1
 #define MAX_COLLECTIBLE_BULLET_COUNT 5
 #define ENEMY_JAM_CONTROL_CLOSE CELL_DISTANCE
@@ -56,7 +56,7 @@ struct App {
       update();
 
       BeginDrawing();
-      ClearBackground(RAYWHITE);
+      ClearBackground(BLACK);
 
       draw();
       perf_chart.register_active_frame_end();
@@ -154,6 +154,8 @@ struct App {
     player.draw(map);
 
     perf_chart.draw();
+
+    // draw_debug_path_finding(*player.pos);
   }
 
  private:
@@ -163,5 +165,15 @@ struct App {
       if (collectible.ty == ty) count++;
     }
     return count;
+  }
+
+  void draw_debug_path_finding(Vector2 const& player_pos) const {
+    auto path = map.path_finder.find_path(Vector2Subtract(GetMousePosition(), map.world_offset), player_pos);
+    if (path.empty()) return;
+
+    for (unsigned int i = 0; i < path.size() - 1; i++) {
+      DrawLineEx(Vector2Add(int_vector2_to_vector2(path[i]), map.world_offset),
+                 Vector2Add(int_vector2_to_vector2(path[i + 1]), map.world_offset), 3.f, MAROON);
+    }
   }
 };

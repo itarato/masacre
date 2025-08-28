@@ -32,6 +32,10 @@ constexpr float int_vector2_dist(IntVector2 lhs, IntVector2 rhs) {
   return sqrtf(powf(lhs.x - rhs.x, 2.f) + powf(lhs.y - rhs.y, 2.f));
 }
 
+Vector2 int_vector2_to_vector2(IntVector2 p) {
+  return Vector2{static_cast<float>(p.x * CELL_DISTANCE), static_cast<float>(p.y * CELL_DISTANCE)};
+}
+
 struct PFCell {
   float prefix{};  // G
   float suffix{};  // H

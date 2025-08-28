@@ -55,12 +55,32 @@ struct PathFinder {
 
   std::vector<IntVector2> find_path(IntVector2 start, IntVector2 end) const {
     if (is_out_of_bounds(start)) {
-      TraceLog(LOG_ERROR, "Out of bound start for path finder: %d:%d.", start.x, start.y);
+      TraceLog(LOG_ERROR, "[PF] start is out of bound: %d:%d.", start.x, start.y);
+      return {};
+    }
+
+    if (!is_accessible(start)) {
+      TraceLog(LOG_ERROR, "[PF] start is not accessible: %d:%d.", start.x, start.y);
+      return {};
+    }
+
+    if (!is_discoverable(start)) {
+      TraceLog(LOG_ERROR, "[PF] start is not discoverable: %d:%d.", start.x, start.y);
       return {};
     }
 
     if (is_out_of_bounds(end)) {
-      TraceLog(LOG_ERROR, "Out of bound end for path finder: %d:%d.", end.x, end.y);
+      TraceLog(LOG_ERROR, "[PF] end is out of bound: %d:%d.", end.x, end.y);
+      return {};
+    }
+
+    if (!is_accessible(end)) {
+      TraceLog(LOG_ERROR, "[PF] end is not accessible: %d:%d.", end.x, end.y);
+      return {};
+    }
+
+    if (!is_discoverable(end)) {
+      TraceLog(LOG_ERROR, "[PF] end is not discoverable: %d:%d.", end.x, end.y);
       return {};
     }
 
@@ -155,12 +175,12 @@ struct PathFinder {
   }
 
   void draw(Vector2 world_offset) const {
-    draw_cells_debug(world_offset);
+    // draw_cells_debug(world_offset);
   }
 
  private:
   bool is_out_of_bounds(IntVector2 const &p) const {
-    return p.x < 0 || p.y < 0 || p.x > cells_w || p.y > cells_h;
+    return p.x < 0 || p.y < 0 || p.x >= cells_w || p.y >= cells_h;
   }
 
   bool is_accessible(IntVector2 const &p) const {
@@ -226,8 +246,8 @@ struct PathFinder {
   }
 
   void draw_cells_debug(Vector2 const &world_offset) const {
-    for (int y = 0; y <= cells_h; y++) {
-      for (int x = 0; x <= cells_w; x++) {
+    for (int y = 0; y < cells_h; y++) {
+      for (int x = 0; x < cells_w; x++) {
         auto color = BLACK;
         if ((cells[PF_CELL_IDX(x, y)] & PF_CELL_DISCOVERABLE_FLAG) > 0) {
           color = GREEN;

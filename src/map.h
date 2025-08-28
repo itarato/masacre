@@ -8,6 +8,7 @@
 
 #define WORLD_PLAYER_MIDZONE_MARGIN_PERCENTAGE 0.3f
 #define WORLD_RANDOM_SPOT_MAX_ATTEMPTS 32
+#define WORLD_OFFSET_MARGIN 64.f
 
 struct Map {
   Vector2 world_offset{};
@@ -48,10 +49,12 @@ struct Map {
     float margin_bottom{GetScreenHeight() * (1.0f - WORLD_PLAYER_MIDZONE_MARGIN_PERCENTAGE)};
     if (player_rel_pos.y > margin_bottom) world_offset.y += margin_bottom - player_rel_pos.y;
 
-    if (world_offset.x > 0.f) world_offset.x = 0.f;
-    if (world_offset.y > 0.f) world_offset.y = 0.f;
-    if (world_offset.x < -width() + GetScreenWidth()) world_offset.x = -width() + GetScreenWidth();
-    if (world_offset.y < -height() + GetScreenHeight()) world_offset.y = -height() + GetScreenHeight();
+    if (world_offset.x > WORLD_OFFSET_MARGIN) world_offset.x = WORLD_OFFSET_MARGIN;
+    if (world_offset.y > WORLD_OFFSET_MARGIN) world_offset.y = WORLD_OFFSET_MARGIN;
+    if (world_offset.x < -width() + GetScreenWidth() - WORLD_OFFSET_MARGIN)
+      world_offset.x = -width() + GetScreenWidth() - WORLD_OFFSET_MARGIN;
+    if (world_offset.y < -height() + GetScreenHeight() - WORLD_OFFSET_MARGIN)
+      world_offset.y = -height() + GetScreenHeight() - WORLD_OFFSET_MARGIN;
   }
 
   bool is_hit(Vector2 point) const {
@@ -62,16 +65,16 @@ struct Map {
   }
 
   void path_finder_init() {
-    path_finder.cells_w = static_cast<int>(floorf(asset_manager.images[ASSET_MAP_IMAGE].width / CELL_DISTANCE));
-    path_finder.cells_h = static_cast<int>(floorf(asset_manager.images[ASSET_MAP_IMAGE].height / CELL_DISTANCE));
+    path_finder.cells_w = static_cast<int>(floorf(asset_manager.images[ASSET_MAP_IMAGE].width / CELL_DISTANCE)) + 1;
+    path_finder.cells_h = static_cast<int>(floorf(asset_manager.images[ASSET_MAP_IMAGE].height / CELL_DISTANCE)) + 1;
 
     if (path_finder.cells_w * path_finder.cells_w >= MAX_GRID_CELLS) {
       TraceLog(LOG_ERROR, "Map too large");
       exit(EXIT_FAILURE);
     }
 
-    for (int y = 0; y <= path_finder.cells_h; y++) {
-      for (int x = 0; x <= path_finder.cells_w; x++) {
+    for (int y = 0; y < path_finder.cells_h; y++) {
+      for (int x = 0; x < path_finder.cells_w; x++) {
         if (is_hit(Vector2{static_cast<float>(x * CELL_DISTANCE), static_cast<float>(y * CELL_DISTANCE)})) {
           path_finder.cells[y * path_finder.cells_w + x] = 0;
         } else {

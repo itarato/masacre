@@ -101,10 +101,7 @@ struct Enemy {
     }
 
     // Likely the enemy is already at the zone of player.
-    if (path.size() <= 1) {
-      move_target = player_pos;
-      return;
-    };
+    if (path.size() <= 1) return;
 
     move_target = Vector2(path[path.size() - 2].x * CELL_DISTANCE, path[path.size() - 2].y * CELL_DISTANCE);
   }
