@@ -118,10 +118,14 @@ struct PathFinder {
   IntVector2 closest_available_cell_idx_from_coord(Vector2 coord) const {
     auto possible_cells = ordered_cell_indices_from_coord(coord);
     for (auto const &cell : possible_cells) {
-      if (!is_out_of_bounds(cell) && is_accessible(cell)) return cell;
+      if (!is_out_of_bounds(cell) && is_discoverable(cell)) return cell;
     }
 
-    TraceLog(LOG_ERROR, "No closest accessible cell found.");
+    TraceLog(LOG_ERROR, "No closest accessible cell found for %.2f:%.2f: %d:%d %d:%d %d:%d %d:%d", coord.x, coord.y,
+             possible_cells[0].x * CELL_DISTANCE, possible_cells[0].y * CELL_DISTANCE,
+             possible_cells[1].x * CELL_DISTANCE, possible_cells[1].y * CELL_DISTANCE,
+             possible_cells[2].x * CELL_DISTANCE, possible_cells[2].y * CELL_DISTANCE,
+             possible_cells[3].x * CELL_DISTANCE, possible_cells[3].y * CELL_DISTANCE);
     return possible_cells.front();
   }
 
@@ -148,6 +152,10 @@ struct PathFinder {
 
     TraceLog(LOG_ERROR, "No available random spot");
     exit(EXIT_FAILURE);
+  }
+
+  void draw(Vector2 world_offset) const {
+    draw_cells_debug(world_offset);
   }
 
  private:
@@ -213,6 +221,20 @@ struct PathFinder {
 
         cells[PF_CELL_IDX(neighbor_pos.x, neighbor_pos.y)] |= PF_CELL_DISCOVERABLE_FLAG;
         queue.push(neighbor_pos);
+      }
+    }
+  }
+
+  void draw_cells_debug(Vector2 const &world_offset) const {
+    for (int y = 0; y <= cells_h; y++) {
+      for (int x = 0; x <= cells_w; x++) {
+        auto color = BLACK;
+        if ((cells[PF_CELL_IDX(x, y)] & PF_CELL_DISCOVERABLE_FLAG) > 0) {
+          color = GREEN;
+        } else if ((cells[PF_CELL_IDX(x, y)] & PF_CELL_ACCESSIBLE_FLAG) > 0) {
+          color = BLUE;
+        }
+        DrawCircle(x * CELL_DISTANCE + world_offset.x, y * CELL_DISTANCE + world_offset.y, 4.f, color);
       }
     }
   }

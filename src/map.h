@@ -30,6 +30,7 @@ struct Map {
 
   void draw() const {
     DrawTextureV(asset_manager.textures[ASSET_MAP_TEXTURE], world_offset, WHITE);
+    path_finder.draw(world_offset);
   }
 
   void update_world_offset(Vector2 player_pos) {
@@ -54,13 +55,15 @@ struct Map {
   }
 
   bool is_hit(Vector2 point) const {
+    if (point.x < 0.f || point.y < 0.f || point.x >= width() || point.y >= height()) return true;
+
     // TraceLog(LOG_INFO, "Col: %d", GetImageColor(map_image, point_abs_adjusted.x, point_abs_adjusted.y).r);
     return GetImageColor(asset_manager.images[ASSET_MAP_IMAGE], point.x, point.y).r < 255;
   }
 
   void path_finder_init() {
-    path_finder.cells_w = asset_manager.images[ASSET_MAP_IMAGE].width / CELL_DISTANCE;
-    path_finder.cells_h = asset_manager.images[ASSET_MAP_IMAGE].height / CELL_DISTANCE;
+    path_finder.cells_w = static_cast<int>(floorf(asset_manager.images[ASSET_MAP_IMAGE].width / CELL_DISTANCE));
+    path_finder.cells_h = static_cast<int>(floorf(asset_manager.images[ASSET_MAP_IMAGE].height / CELL_DISTANCE));
 
     if (path_finder.cells_w * path_finder.cells_w >= MAX_GRID_CELLS) {
       TraceLog(LOG_ERROR, "Map too large");
