@@ -4,20 +4,15 @@ Silly top-view 2D shooting game.
 
 Bugs:
 
-- (similar) player close to edge/hit can get its cell-coords rounded to the dead zone - same result
 - enemies can overlap each other
 - player can get spawn (center) on a hit zone
-- enemy/collectible can be spawned on a surrounded zone
 
 Missing:
 
 - moving smoke
-- enemy kill particles
-- player dying smoke
-- player hit flash
+- new enemy spawned should be at a minimum distance from the player
 - player died message
 - minimap
-- new enemy spawned should be at a minimum distance from the player
 - player deploying landmines
-- enemy should stop at a distance from the player
 - when reaching map borders - let the player get to the screen edge
+- 

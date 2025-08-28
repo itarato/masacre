@@ -122,6 +122,40 @@ constexpr IntVector2 cell_idx_from_coord(Vector2 const &p) {
   return IntVector2{(int)roundf(p.x / CELL_DISTANCE), (int)roundf(p.y / CELL_DISTANCE)};
 }
 
+float mod_reduced(float v, float mod) {
+  return v - fmod(v, mod);
+}
+
+std::vector<IntVector2> ordered_cell_indices_from_coord(Vector2 const &p) {
+  int x_closest, x_farthest, y_closest, y_farthest;
+
+  if (p.x <= mod_reduced(p.x, CELL_DISTANCE) + CELL_DISTANCE / 2.f) {
+    x_closest = static_cast<int>(floorf(p.x / CELL_DISTANCE));
+    x_farthest = static_cast<int>(ceilf(p.x / CELL_DISTANCE));
+  } else {
+    x_closest = static_cast<int>(ceilf(p.x / CELL_DISTANCE));
+    x_farthest = static_cast<int>(floorf(p.x / CELL_DISTANCE));
+  }
+
+  if (p.y <= mod_reduced(p.y, CELL_DISTANCE) + CELL_DISTANCE / 2.f) {
+    y_closest = static_cast<int>(floorf(p.y / CELL_DISTANCE));
+    y_farthest = static_cast<int>(ceilf(p.y / CELL_DISTANCE));
+  } else {
+    y_closest = static_cast<int>(ceilf(p.y / CELL_DISTANCE));
+    y_farthest = static_cast<int>(floorf(p.y / CELL_DISTANCE));
+  }
+
+  std::vector<IntVector2> out{};
+  out.resize(4);
+
+  out[0] = {x_closest, y_closest};
+  out[1] = {x_closest, y_farthest};
+  out[2] = {x_farthest, y_closest};
+  out[3] = {x_farthest, y_farthest};
+
+  return out;
+}
+
 void draw_texture(Texture2D const &texture, Vector2 const &pos, float angle_deg) {
   DrawTexturePro(texture, {0.f, 0.f, (float)texture.width, (float)texture.height},
                  {pos.x, pos.y, (float)texture.width, (float)texture.height},

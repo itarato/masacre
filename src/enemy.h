@@ -12,6 +12,7 @@
 #define ENEMY_SPEED 200.f
 #define ENEMY_TARGET_REACH_THRESHOLD 1.f
 #define ENEMY_EXPLOSION_SPEED 200.f
+#define ENEMY_PLAYER_MIN_CHASE_DISTANCE 100.f
 
 struct Enemy {
   Vector2 pos;
@@ -35,7 +36,7 @@ struct Enemy {
       if (Vector2Distance(pos, move_target) <= ENEMY_TARGET_REACH_THRESHOLD) {
         update_move_target(player_pos, map);
       } else {
-        update_movement_towards_target();
+        update_movement_towards_target(player_pos);
       }
 
       barrel_angle_rad = abs_angle_of_points(pos, player_pos);
@@ -88,6 +89,8 @@ struct Enemy {
 
  private:
   void update_move_target(Vector2 const &player_pos, Map const &map) {
+    if (Vector2Distance(pos, player_pos) <= ENEMY_PLAYER_MIN_CHASE_DISTANCE) return;
+
     auto path = map.path_finder.find_path(pos, player_pos);
     if (path.empty()) {
       TraceLog(LOG_INFO, "No path from enemy to player");
@@ -103,7 +106,9 @@ struct Enemy {
     move_target = Vector2(path[path.size() - 2].x * CELL_DISTANCE, path[path.size() - 2].y * CELL_DISTANCE);
   }
 
-  void update_movement_towards_target() {
+  void update_movement_towards_target(Vector2 const &player_pos) {
+    if (Vector2Distance(pos, player_pos) <= ENEMY_PLAYER_MIN_CHASE_DISTANCE) return;
+
     Vector2 delta = Vector2Subtract(pos, move_target);
     float total_dist = Vector2Distance(pos, move_target);
     float move_dist = ENEMY_SPEED * GetFrameTime();

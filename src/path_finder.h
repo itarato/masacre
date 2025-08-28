@@ -24,7 +24,7 @@
 // Cells that are discoverable from `start_pos`.
 #define PF_CELL_DISCOVERABLE_FLAG 0b10
 
-#define PF_RANDOM_SPOT_MAX_ATTEMPTS 16
+#define PF_RANDOM_SPOT_MAX_ATTEMPTS 32
 
 static int8_t NEIGHBOR_MAP[8][2]{
     {-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1},
@@ -46,9 +46,10 @@ struct PathFinder {
     init_start_pos();
     init_discoverable_cells();
   }
+
   std::vector<IntVector2> find_path(Vector2 start, Vector2 end) const {
-    IntVector2 start_normalized = cell_idx_from_coord(start);
-    IntVector2 end_normalized = cell_idx_from_coord(end);
+    IntVector2 start_normalized = closest_available_cell_idx_from_coord(start);
+    IntVector2 end_normalized = closest_available_cell_idx_from_coord(end);
     return find_path(start_normalized, end_normalized);
   }
 
@@ -112,6 +113,16 @@ struct PathFinder {
 
     TraceLog(LOG_WARNING, "Did not find a path for %d:%d -> %d:%d", start.x, start.y, end.x, end.y);
     return {};
+  }
+
+  IntVector2 closest_available_cell_idx_from_coord(Vector2 coord) const {
+    auto possible_cells = ordered_cell_indices_from_coord(coord);
+    for (auto const &cell : possible_cells) {
+      if (!is_out_of_bounds(cell) && is_accessible(cell)) return cell;
+    }
+
+    TraceLog(LOG_ERROR, "No closest accessible cell found.");
+    return possible_cells.front();
   }
 
   float heuristic_distance(IntVector2 lhs, IntVector2 rhs) const {

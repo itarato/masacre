@@ -71,6 +71,8 @@ struct App {
 
     // Collision checks.
     for (auto& enemy : enemies) {
+      if (enemy.is_dead) continue;
+
       for (auto& bullet : player.bullets) {
         if (CheckCollisionPointCircle(bullet.pos, enemy.pos, enemy.circle_frame_radius)) {
           enemy.kill();
