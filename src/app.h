@@ -13,7 +13,7 @@
 #include "player.h"
 #include "raylib.h"
 
-#define ENEMY_SPAWN_COUNT 6
+#define ENEMY_SPAWN_COUNT 10
 #define MAX_COLLECTIBLE_HEALTH_COUNT 1
 #define MAX_COLLECTIBLE_BULLET_COUNT 5
 
@@ -26,7 +26,7 @@ struct App {
   void init() {
     srand(time(nullptr));
 
-    // SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+    SetConfigFlags(FLAG_WINDOW_HIGHDPI);
     InitWindow(WINDOW_W, WINDOW_H, "Masacre");
     SetTargetFPS(GetMonitorRefreshRate(0));
 
