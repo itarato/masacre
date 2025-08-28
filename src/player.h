@@ -23,6 +23,7 @@
 struct Player {
   std::shared_ptr<Vector2> pos = std::make_shared<Vector2>();
   float circle_frame_radius{};
+  // Degree.
   float angle;
   std::vector<Bullet> bullets{};
 
@@ -32,6 +33,7 @@ struct Player {
 
   ParticleManager particle_manager{};
   RepeatedTask smoke_particle_scheduler{0.08};
+  RepeatedTask wheel_trace_particle_scheduler{0.05};
 
   void init() {
     circle_frame_radius = asset_manager.textures[ASSET_PLAYER_TEXTURE].width / 2.f;
@@ -172,6 +174,14 @@ struct Player {
       }
 
       *pos = old_pos;
+    }
+
+    if (!Vector2Equals(*pos, old_pos)) {
+      wheel_trace_particle_scheduler.update();
+
+      if (wheel_trace_particle_scheduler.did_tick) {
+        particle_manager.particles.emplace_back(std::make_unique<TraceParticle>(*pos, angle + 90));
+      }
     }
   }
 

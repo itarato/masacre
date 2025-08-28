@@ -117,6 +117,26 @@ struct StraightLineParticle final : Particle {
   }
 };
 
+struct TraceParticle final : Particle {
+  float angle_deg;
+  float alpha{0.3};
+
+  TimedTask lifetime{1.0};
+
+  TraceParticle(Vector2 _pos, float _angle_deg) : Particle(_pos), angle_deg(_angle_deg) {
+  }
+
+  void draw(Map const &map) const override {
+    DrawRectanglePro(Rectangle{pos.x + map.world_offset.x, pos.y + map.world_offset.y, 40.f, 10.f}, Vector2{20.f, 5.f},
+                     angle_deg, ColorAlpha(DARKBROWN, alpha));
+  }
+
+  void update() override {
+    if (lifetime.is_completed()) should_be_deleted = true;
+    alpha -= GetFrameTime() * 0.4f;
+  }
+};
+
 struct BurnParticleGroup final : Particle {
   std::shared_ptr<Vector2> player_pos;
   TimedTask lifetime{1.0};
