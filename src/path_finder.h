@@ -1,11 +1,9 @@
 #pragma once
 
-#include <stdlib.h>
-
 #include <algorithm>
 #include <cmath>
-#include <vector>
 #include <ranges>
+#include <vector>
 
 #include "common.h"
 #include "raylib.h"
@@ -20,7 +18,10 @@
 
 #define PF_CELL_FLAG_VISITED 0b1
 
-#define PF_CELL_ACCESSIBLE_FLAG 0b1
+// Cells that are not on a hit zone.
+#define PF_CELL_ACCESSIBLE_FLAG 0b01
+// Cells that are discoverable from `start_pos`.
+#define PF_CELL_DISCOVERABLE_FLAG 0b10
 
 static int8_t NEIGHBOR_MAP[8][2]{
     {-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1},
@@ -31,11 +32,17 @@ struct PathFinder {
   int cells_w{};
   int cells_h{};
 
+  IntVector2 start_pos{};
+
   PathFinder() {
   }
   ~PathFinder() {
   }
 
+  void post_init() {
+    init_start_pos();
+    init_discoverable_cells();
+  }
   std::vector<IntVector2> find_path(Vector2 start, Vector2 end) const {
     IntVector2 start_normalized = cell_idx_from_coord(start);
     IntVector2 end_normalized = cell_idx_from_coord(end);
@@ -141,5 +148,12 @@ struct PathFinder {
     }
 
     return out;
+  }
+
+ private:
+  void init_start_pos() {
+  }
+
+  void init_discoverable_cells() {
   }
 };

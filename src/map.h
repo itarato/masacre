@@ -7,6 +7,7 @@
 #include "raymath.h"
 
 #define WORLD_PLAYER_MIDZONE_MARGIN_PERCENTAGE 0.3f
+#define WORLD_RANDOM_SPOT_MAX_ATTEMPTS 32
 
 struct Map {
   Vector2 world_offset{};
@@ -78,5 +79,19 @@ struct Map {
 
   int height() const {
     return asset_manager.images[ASSET_MAP_IMAGE].height;
+  }
+
+  Vector2 available_random_spot() const {
+    Vector2 pos;
+
+    for (int i = 0; i < WORLD_RANDOM_SPOT_MAX_ATTEMPTS; i++) {
+      pos = Vector2{(float)((rand() % (path_finder.cells_w + 1)) * CELL_DISTANCE),
+                    (float)((rand() % (path_finder.cells_h + 1)) * CELL_DISTANCE)};
+
+      if (!is_hit(pos)) return pos;
+    }
+
+    TraceLog(LOG_ERROR, "No available random spot");
+    exit(EXIT_FAILURE);
   }
 };
