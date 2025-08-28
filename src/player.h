@@ -34,6 +34,7 @@ struct Player {
   ParticleManager particle_manager{};
   RepeatedTask smoke_particle_scheduler{0.08};
   RepeatedTask wheel_trace_particle_scheduler{0.05};
+  RepeatedTask rapid_fire_scheduler{0.05};
 
   void init() {
     circle_frame_radius = asset_manager.textures[ASSET_PLAYER_TEXTURE].width / 2.f;
@@ -126,15 +127,26 @@ struct Player {
     if (bullet_count <= 0) return;
 
     if (IsKeyPressed(KEY_LEFT_CONTROL) || IsGamepadButtonPressed(0, 7)) {
-      bullet_count--;
-
-      float bullet_angle_rad = angle * DEG2RAD;
-      Vector2 bullet_v{cosf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime(),
-                       sinf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime()};
-      bullets.emplace_back(*pos, bullet_v);
-
-      PlaySound(asset_manager.sounds[ASSET_SOUND_PLAYER_SHOOT]);
+      unconditional_shoot();
     }
+
+    if (IsKeyDown(KEY_LEFT_ALT)) {
+      rapid_fire_scheduler.update();
+      if (rapid_fire_scheduler.did_tick) {
+        unconditional_shoot();
+      }
+    }
+  }
+
+  void unconditional_shoot() {
+    bullet_count--;
+
+    float bullet_angle_rad = angle * DEG2RAD;
+    Vector2 bullet_v{cosf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime(),
+                     sinf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime()};
+    bullets.emplace_back(*pos, bullet_v);
+
+    PlaySound(asset_manager.sounds[ASSET_SOUND_PLAYER_SHOOT]);
   }
 
   void update_movement(Map const &map) {
