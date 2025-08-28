@@ -19,6 +19,9 @@
 #define PLAYER_WALL_COLLIDE_ANGLE_ADJUST PI / 3.f
 #define PLAYER_WALL_COLLIDE_DISTANCE_ADJUST 0.5f
 #define PLAYER_MAX_HEALTH 100
+#define PLAYER_STARTER_BULLET_COUNT 100
+#define PLAYER_HEALTH_COLLECT 25
+#define PLAYER_BULLET_COLLECT 50
 
 struct Player {
   std::shared_ptr<Vector2> pos = std::make_shared<Vector2>();
@@ -45,7 +48,7 @@ struct Player {
     bullets.clear();
     pos->x = map.path_finder.start_pos.x * CELL_DISTANCE;
     pos->y = map.path_finder.start_pos.y * CELL_DISTANCE;
-    bullet_count = 16;
+    bullet_count = PLAYER_STARTER_BULLET_COUNT;
     health = PLAYER_MAX_HEALTH;
     kill_count = 0;
     _should_be_deleted = false;
@@ -229,10 +232,10 @@ struct Player {
   void consume(Collectible const &collectible) {
     switch (collectible.ty) {
       case CollectibleType::Bullet:
-        bullet_count += 10;
+        bullet_count += PLAYER_BULLET_COLLECT;
         break;
       case CollectibleType::Health:
-        health += 20;
+        health += PLAYER_HEALTH_COLLECT;
         if (health > PLAYER_MAX_HEALTH) health = PLAYER_MAX_HEALTH;
         break;
       default:

@@ -14,7 +14,7 @@
 #include "player.h"
 #include "raylib.h"
 
-#define ENEMY_SPAWN_COUNT 6
+#define ENEMY_SPAWN_COUNT 16
 #define MAX_COLLECTIBLE_HEALTH_COUNT 1
 #define MAX_COLLECTIBLE_BULLET_COUNT 5
 #define ENEMY_JAM_CONTROL_CLOSE CELL_DISTANCE

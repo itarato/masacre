@@ -165,7 +165,7 @@ struct PathFinder {
     IntVector2 pos;
 
     for (int i = 0; i < PF_RANDOM_SPOT_MAX_ATTEMPTS; i++) {
-      pos = IntVector2{rand() % (cells_w + 1), rand() % (cells_h + 1)};
+      pos = IntVector2{rand() % cells_w, rand() % cells_h};
 
       if (is_discoverable(pos)) return pos;
     }

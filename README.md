@@ -6,12 +6,11 @@ Silly top-view 2D shooting game.
 
 Bugs:
 
-- enemy stuck in wall
-
 Missing:
 
 - new enemy spawned should be at a minimum distance from the player
 - player died message
 - minimap
 - player deploying landmines
+- enemy has health + rapid fire not being instant kill (but have smoke)
 - 
