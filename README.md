@@ -6,8 +6,6 @@ Silly top-view 2D shooting game.
 
 Bugs:
 
-- enemies can overlap each other
-
 Missing:
 
 - moving smoke
@@ -15,4 +13,5 @@ Missing:
 - player died message
 - minimap
 - player deploying landmines
-- 
+- rapid fire
+- sl

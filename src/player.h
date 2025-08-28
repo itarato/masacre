@@ -1,5 +1,7 @@
 #pragma once
 
+#include <signal.h>
+
 #include <memory>
 #include <vector>
 
@@ -82,15 +84,20 @@ struct Player {
     draw_texture(asset_manager.textures[ASSET_PLAYER_TEXTURE], screen_relative_center(map.world_offset), angle);
 
     // Draw HUD.
-    DrawRectangle(GetScreenWidth() - 144, GetScreenHeight() - 80, 140, 76, ColorAlpha(DARKGRAY, 0.9f));
+    DrawRectangle(GetScreenWidth() - 144, GetScreenHeight() - 104, 140, 100, ColorAlpha(DARKGRAY, 0.9f));
 
     // Health bar.
-    DrawRectangle(GetScreenWidth() - 112, GetScreenHeight() - 24, (health / PLAYER_MAX_HEALTH) * 100.f, 12, RED);
+    DrawRectangle(GetScreenWidth() - 112, GetScreenHeight() - 96, (health / PLAYER_MAX_HEALTH) * 100.f, 12, RED);
     DrawRectangleLinesEx(
-        Rectangle{static_cast<float>(GetScreenWidth() - 116), static_cast<float>(GetScreenHeight() - 28), 108.f, 20.f},
+        Rectangle{static_cast<float>(GetScreenWidth() - 116), static_cast<float>(GetScreenHeight() - 100), 108.f, 20.f},
         2.f, WHITE);
-    DrawTexture(asset_manager.textures[ASSET_ICON_HEALTH_TEXTURE], GetScreenWidth() - 140, GetScreenHeight() - 28,
+    DrawTexture(asset_manager.textures[ASSET_ICON_HEALTH_TEXTURE], GetScreenWidth() - 140, GetScreenHeight() - 100,
                 WHITE);
+
+    // Kill bar.
+    DrawTexture(asset_manager.textures[ASSET_ICON_KILLS_TEXTURE], GetScreenWidth() - 140, GetScreenHeight() - 76,
+                WHITE);
+    DrawText(TextFormat("%d", kill_count), GetScreenWidth() - 116, GetScreenHeight() - 76, 20, WHITE);
 
     // Bullet bar.
     DrawTexture(asset_manager.textures[ASSET_ICON_BULLET_TEXTURE], GetScreenWidth() - 140, GetScreenHeight() - 52,
@@ -98,8 +105,8 @@ struct Player {
     DrawText(TextFormat("%d", bullet_count), GetScreenWidth() - 116, GetScreenHeight() - 52, 20, WHITE);
 
     // FPS bar.
-    DrawTexture(asset_manager.textures[ASSET_ICON_FPS_TEXTURE], GetScreenWidth() - 140, GetScreenHeight() - 76, WHITE);
-    DrawText(TextFormat("%d FPS", GetFPS()), GetScreenWidth() - 116, GetScreenHeight() - 76, 20, WHITE);
+    DrawTexture(asset_manager.textures[ASSET_ICON_FPS_TEXTURE], GetScreenWidth() - 140, GetScreenHeight() - 28, WHITE);
+    DrawText(TextFormat("%d FPS", GetFPS()), GetScreenWidth() - 116, GetScreenHeight() - 28, 20, WHITE);
 
     // Draw particles.
     particle_manager.draw(map);
@@ -127,7 +134,7 @@ struct Player {
   }
 
   void update_movement(Map const &map) {
-    Vector2 old_pos = *pos;
+    const Vector2 old_pos = *pos;
 
     if (IsKeyDown(KEY_UP)) move_to_relative_direction(0.f, 1.f);
     if (IsKeyDown(KEY_DOWN)) move_to_relative_direction(PI, 1.f);

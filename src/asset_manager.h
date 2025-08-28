@@ -16,6 +16,7 @@
 #define ASSET_ICON_FPS_TEXTURE 7
 #define ASSET_ENEMY_BARREL_TEXTURE 8
 #define ASSET_BULLET_TEXTURE 9
+#define ASSET_ICON_KILLS_TEXTURE 10
 
 #define ASSET_MAP_IMAGE 0
 
@@ -39,6 +40,7 @@ struct AssetManager {
     textures[ASSET_ICON_BULLET_TEXTURE] = LoadTexture("./assets/images/icon_bullet.png");
     textures[ASSET_ICON_FPS_TEXTURE] = LoadTexture("./assets/images/icon_fps.png");
     textures[ASSET_BULLET_TEXTURE] = LoadTexture("./assets/images/bullet.png");
+    textures[ASSET_ICON_KILLS_TEXTURE] = LoadTexture("./assets/images/icon_kills.png");
 
     images[ASSET_MAP_IMAGE] = LoadImage("./assets/images/map_image.png");
   }
