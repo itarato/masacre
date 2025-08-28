@@ -46,6 +46,11 @@ struct Map {
 
     float margin_bottom{GetScreenHeight() * (1.0f - WORLD_PLAYER_MIDZONE_MARGIN_PERCENTAGE)};
     if (player_rel_pos.y > margin_bottom) world_offset.y += margin_bottom - player_rel_pos.y;
+
+    if (world_offset.x > 0.f) world_offset.x = 0.f;
+    if (world_offset.y > 0.f) world_offset.y = 0.f;
+    if (world_offset.x < -width() + GetScreenWidth()) world_offset.x = -width() + GetScreenWidth();
+    if (world_offset.y < -height() + GetScreenHeight()) world_offset.y = -height() + GetScreenHeight();
   }
 
   bool is_hit(Vector2 point) const {
