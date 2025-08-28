@@ -98,9 +98,12 @@ struct StraightLineParticle final : Particle {
   float size{6.f};
   float speed_multiplier{1.0};
   Color color{GOLD};
+  float pos_jitter{40.f};
 
   StraightLineParticle(Vector2 _pos, float _angle_rad, float _speed, double _lifetime)
       : Particle(_pos), angle_rad(_angle_rad), speed(_speed), lifetime(_lifetime) {
+    pos.x += randf() * pos_jitter - pos_jitter / 2.f;
+    pos.y += randf() * pos_jitter - pos_jitter / 2.f;
   }
 
   void draw(Map const &map) const override {

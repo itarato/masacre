@@ -84,7 +84,12 @@ struct Player {
     for (auto const &bullet : bullets) bullet.draw(map);
 
     // Draw main player.
-    draw_texture(asset_manager.textures[ASSET_PLAYER_TEXTURE], screen_relative_center(map.world_offset), angle);
+    if (!should_be_deleted()) {
+      draw_texture(asset_manager.textures[ASSET_PLAYER_TEXTURE], screen_relative_center(map.world_offset), angle);
+    } else {
+      draw_texture(asset_manager.textures[ASSET_PLAYER_BROKEN_TEXTURE], screen_relative_center(map.world_offset),
+                   angle);
+    }
 
     // Draw HUD.
     DrawRectangle(GetScreenWidth() - 144, GetScreenHeight() - 104, 140, 100, ColorAlpha(DARKGRAY, 0.9f));

@@ -25,6 +25,7 @@ struct Enemy {
   ParticleManager particle_manager{};
   float barrel_angle_rad{};
   float collision_avoidance_slowdown{1.f};
+  RepeatedTask smoke_particle_scheduler{0.1};
 
   Enemy(Vector2 _pos) : pos(_pos), move_target(_pos) {
     // The frame is derived from the image which is designed for turning.
@@ -51,6 +52,9 @@ struct Enemy {
 
         PlaySound(asset_manager.sounds[ASSET_SOUND_ENEMY_SHOOT]);
       }
+    } else {
+      smoke_particle_scheduler.update();
+      if (smoke_particle_scheduler.did_tick) particle_manager.particles.push_back(std::make_unique<SmokeParticle>(pos));
     }
 
     particle_manager.update();
@@ -58,9 +62,13 @@ struct Enemy {
   }
 
   void draw(Map const &map, Vector2 const &player_pos) const {
-    draw_texture(asset_manager.textures[ASSET_ENEMY_WHEEL_TEXTURE], Vector2Add(pos, map.world_offset), angle);
-    draw_texture(asset_manager.textures[ASSET_ENEMY_BARREL_TEXTURE], Vector2Add(pos, map.world_offset),
-                 barrel_angle_rad * RAD2DEG);
+    if (is_dead) {
+      draw_texture(asset_manager.textures[ASSET_ENEMY_BROKEN_TEXTURE], Vector2Add(pos, map.world_offset), angle);
+    } else {
+      draw_texture(asset_manager.textures[ASSET_ENEMY_WHEEL_TEXTURE], Vector2Add(pos, map.world_offset), angle);
+      draw_texture(asset_manager.textures[ASSET_ENEMY_BARREL_TEXTURE], Vector2Add(pos, map.world_offset),
+                   barrel_angle_rad * RAD2DEG);
+    }
 
     particle_manager.draw(map);
   }

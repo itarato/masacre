@@ -17,6 +17,8 @@
 #define ASSET_ENEMY_BARREL_TEXTURE 8
 #define ASSET_BULLET_TEXTURE 9
 #define ASSET_ICON_KILLS_TEXTURE 10
+#define ASSET_PLAYER_BROKEN_TEXTURE 11
+#define ASSET_ENEMY_BROKEN_TEXTURE 12
 
 #define ASSET_MAP_IMAGE 0
 
@@ -36,7 +38,7 @@ struct AssetManager {
   }
 
   void init() {
-    textures[ASSET_PLAYER_TEXTURE] = LoadTexture("./assets/images/player_00.png");
+    textures[ASSET_PLAYER_TEXTURE] = LoadTexture("./assets/images/player.png");
     textures[ASSET_MAP_TEXTURE] = LoadTexture("./assets/images/map_texture.png");
     textures[ASSET_ENEMY_WHEEL_TEXTURE] = LoadTexture("./assets/images/enemy_wheel.png");
     textures[ASSET_ENEMY_BARREL_TEXTURE] = LoadTexture("./assets/images/enemy_barrel.png");
@@ -47,6 +49,8 @@ struct AssetManager {
     textures[ASSET_ICON_FPS_TEXTURE] = LoadTexture("./assets/images/icon_fps.png");
     textures[ASSET_BULLET_TEXTURE] = LoadTexture("./assets/images/bullet.png");
     textures[ASSET_ICON_KILLS_TEXTURE] = LoadTexture("./assets/images/icon_kills.png");
+    textures[ASSET_PLAYER_BROKEN_TEXTURE] = LoadTexture("./assets/images/player_broken.png");
+    textures[ASSET_ENEMY_BROKEN_TEXTURE] = LoadTexture("./assets/images/enemy_broken.png");
 
     images[ASSET_MAP_IMAGE] = LoadImage("./assets/images/map_image.png");
 

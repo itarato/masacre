@@ -30,7 +30,7 @@ struct App {
   void init() {
     srand(time(nullptr));
 
-    SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+    SetConfigFlags(FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE);
     InitWindow(WINDOW_W, WINDOW_H, "Masacre");
     InitAudioDevice();
     SetTargetFPS(GetMonitorRefreshRate(0));
