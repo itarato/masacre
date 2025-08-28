@@ -38,8 +38,8 @@ struct Player {
   void reset(Map const &map) {
     angle = 270.f;  // Up.
     bullets.clear();
-    pos->x = map.width() / 2.f;
-    pos->y = map.height() / 2.f;
+    pos->x = map.path_finder.start_pos.x * CELL_DISTANCE;
+    pos->y = map.path_finder.start_pos.y * CELL_DISTANCE;
     bullet_count = 16;
     health = PLAYER_MAX_HEALTH;
     kill_count = 0;

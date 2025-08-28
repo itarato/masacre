@@ -20,3 +20,4 @@ Missing:
 - new enemy spawned should be at a minimum distance from the player
 - player deploying landmines
 - enemy should stop at a distance from the player
+- when reaching map borders - let the player get to the screen edge

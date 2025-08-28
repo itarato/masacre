@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <queue>
 #include <ranges>
 #include <vector>
 
@@ -22,6 +23,8 @@
 #define PF_CELL_ACCESSIBLE_FLAG 0b01
 // Cells that are discoverable from `start_pos`.
 #define PF_CELL_DISCOVERABLE_FLAG 0b10
+
+#define PF_RANDOM_SPOT_MAX_ATTEMPTS 16
 
 static int8_t NEIGHBOR_MAP[8][2]{
     {-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1},
@@ -123,12 +126,30 @@ struct PathFinder {
     }
   }
 
+  IntVector2 discoverable_random_spot() const {
+    IntVector2 pos;
+
+    for (int i = 0; i < PF_RANDOM_SPOT_MAX_ATTEMPTS; i++) {
+      pos = IntVector2{rand() % (cells_w + 1), rand() % (cells_h + 1)};
+
+      if (is_discoverable(pos)) return pos;
+    }
+
+    TraceLog(LOG_ERROR, "No available random spot");
+    exit(EXIT_FAILURE);
+  }
+
+ private:
   bool is_out_of_bounds(IntVector2 const &p) const {
     return p.x < 0 || p.y < 0 || p.x > cells_w || p.y > cells_h;
   }
 
   bool is_accessible(IntVector2 const &p) const {
     return (cells[PF_CELL_IDX(p.x, p.y)] & PF_CELL_ACCESSIBLE_FLAG) > 0;
+  }
+
+  bool is_discoverable(IntVector2 const &p) const {
+    return (cells[PF_CELL_IDX(p.x, p.y)] & PF_CELL_DISCOVERABLE_FLAG) > 0;
   }
 
   std::vector<IntVector2> backtrack_path(u_int8_t *visited_cells, IntVector2 const &start,
@@ -150,10 +171,38 @@ struct PathFinder {
     return out;
   }
 
- private:
   void init_start_pos() {
+    int x = cells_w / 2;
+    for (int y = cells_h / 2; y >= 0; y++) {
+      if ((cells[PF_CELL_IDX(x, y)] & PF_CELL_ACCESSIBLE_FLAG) > 0) {
+        start_pos = {x, y};
+        return;
+      }
+    }
+
+    TraceLog(LOG_ERROR, "No start position found.");
+    exit(EXIT_FAILURE);
   }
 
   void init_discoverable_cells() {
+    std::queue<IntVector2> queue{};
+    queue.push(start_pos);
+
+    cells[PF_CELL_IDX(start_pos.x, start_pos.y)] |= PF_CELL_DISCOVERABLE_FLAG;
+
+    while (!queue.empty()) {
+      IntVector2 current_pos = queue.front();
+      queue.pop();
+
+      for (auto const &neighbor_offs : NEIGHBOR_MAP) {
+        IntVector2 neighbor_pos{current_pos.x + neighbor_offs[0], current_pos.y + neighbor_offs[1]};
+        if (is_out_of_bounds(neighbor_pos)) continue;
+        if (!is_accessible(neighbor_pos)) continue;
+        if (is_discoverable(neighbor_pos)) continue;
+
+        cells[PF_CELL_IDX(neighbor_pos.x, neighbor_pos.y)] |= PF_CELL_DISCOVERABLE_FLAG;
+        queue.push(neighbor_pos);
+      }
+    }
   }
 };

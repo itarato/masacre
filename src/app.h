@@ -96,14 +96,14 @@ struct App {
     std::erase_if(collectibles, [](const auto& e) { return e.should_be_deleted; });
 
     if (enemies.empty()) {
-      for (int i = 0; i < ENEMY_SPAWN_COUNT; i++) enemies.emplace_back(map.available_random_spot());
+      for (int i = 0; i < ENEMY_SPAWN_COUNT; i++) enemies.emplace_back(map.discoverable_random_spot());
     }
 
     if (collectible_count_of_type(CollectibleType::Health) < MAX_COLLECTIBLE_HEALTH_COUNT) {
-      collectibles.emplace_back(map.available_random_spot(), CollectibleType::Health);
+      collectibles.emplace_back(map.discoverable_random_spot(), CollectibleType::Health);
     }
     if (collectible_count_of_type(CollectibleType::Bullet) < MAX_COLLECTIBLE_BULLET_COUNT) {
-      collectibles.emplace_back(map.available_random_spot(), CollectibleType::Bullet);
+      collectibles.emplace_back(map.discoverable_random_spot(), CollectibleType::Bullet);
     }
   }
 

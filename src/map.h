@@ -71,6 +71,8 @@ struct Map {
         }
       }
     }
+
+    path_finder.post_init();
   }
 
   int width() const {
@@ -81,17 +83,8 @@ struct Map {
     return asset_manager.images[ASSET_MAP_IMAGE].height;
   }
 
-  Vector2 available_random_spot() const {
-    Vector2 pos;
-
-    for (int i = 0; i < WORLD_RANDOM_SPOT_MAX_ATTEMPTS; i++) {
-      pos = Vector2{(float)((rand() % (path_finder.cells_w + 1)) * CELL_DISTANCE),
-                    (float)((rand() % (path_finder.cells_h + 1)) * CELL_DISTANCE)};
-
-      if (!is_hit(pos)) return pos;
-    }
-
-    TraceLog(LOG_ERROR, "No available random spot");
-    exit(EXIT_FAILURE);
+  Vector2 discoverable_random_spot() const {
+    IntVector2 pos = path_finder.discoverable_random_spot();
+    return Vector2{static_cast<float>(pos.x * CELL_DISTANCE), static_cast<float>(pos.y * CELL_DISTANCE)};
   }
 };
