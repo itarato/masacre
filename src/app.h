@@ -8,6 +8,7 @@
 #include "collectibles.h"
 #include "common.h"
 #include "enemy.h"
+#include "intrinsic.h"
 #include "map.h"
 #include "particles.h"
 #include "player.h"
@@ -16,12 +17,15 @@
 #define ENEMY_SPAWN_COUNT 10
 #define MAX_COLLECTIBLE_HEALTH_COUNT 1
 #define MAX_COLLECTIBLE_BULLET_COUNT 5
+#define ENEMY_JAM_CONTROL_CLOSE CELL_DISTANCE
+#define ENEMY_JAM_CONTROL_TOO_CLOSE (CELL_DISTANCE / 2.f)
 
 struct App {
   Player player{};
   Map map{};
   std::vector<Enemy> enemies{};
   std::vector<Collectible> collectibles{};
+  PerfChart perf_chart{};
 
   void init() {
     srand(time(nullptr));
@@ -47,12 +51,14 @@ struct App {
 
   void run() {
     while (!WindowShouldClose()) {
+      perf_chart.register_active_frame_start();
       update();
 
       BeginDrawing();
       ClearBackground(RAYWHITE);
 
       draw();
+      perf_chart.register_active_frame_end();
 
       EndDrawing();
     }
@@ -94,6 +100,29 @@ struct App {
       }
     }
 
+    // Enemy jam control.
+    for (auto& enemy : enemies) enemy.collision_avoidance_slowdown = 1.f;
+    for (auto& enemy_lhs : enemies) {
+      for (auto& enemy_rhs : enemies) {
+        if (&enemy_lhs == &enemy_rhs) continue;
+
+        if (Vector2Distance(enemy_lhs.pos, enemy_rhs.pos) < ENEMY_JAM_CONTROL_TOO_CLOSE) {
+          if (Vector2Distance(enemy_lhs.pos, *player.pos) < Vector2Distance(enemy_rhs.pos, *player.pos)) {
+            enemy_rhs.collision_avoidance_slowdown = 0.f;
+          } else {
+            enemy_lhs.collision_avoidance_slowdown *= 0.f;
+          }
+        } else if (Vector2Distance(enemy_lhs.pos, enemy_rhs.pos) < ENEMY_JAM_CONTROL_CLOSE) {
+          if (Vector2Distance(enemy_lhs.pos, *player.pos) < Vector2Distance(enemy_rhs.pos, *player.pos)) {
+            enemy_rhs.collision_avoidance_slowdown *= 0.9f;
+          } else {
+            enemy_lhs.collision_avoidance_slowdown *= 0.9f;
+          }
+        }
+      }
+    }
+
+    // Delete disposables.
     std::erase_if(enemies, [](const auto& e) { return e.should_be_deleted(); });
     std::erase_if(collectibles, [](const auto& e) { return e.should_be_deleted; });
 
@@ -107,6 +136,8 @@ struct App {
     if (collectible_count_of_type(CollectibleType::Bullet) < MAX_COLLECTIBLE_BULLET_COUNT) {
       collectibles.emplace_back(map.discoverable_random_spot(), CollectibleType::Bullet);
     }
+
+    perf_chart.update();
   }
 
   void draw() const {
@@ -118,6 +149,8 @@ struct App {
     game_scope.draw(map);
 
     player.draw(map);
+
+    perf_chart.draw();
   }
 
  private:

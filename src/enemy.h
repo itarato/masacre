@@ -24,6 +24,7 @@ struct Enemy {
   RepeatedTask shooting_task{2.0, 2.0};
   ParticleManager particle_manager{};
   float barrel_angle_rad{};
+  float collision_avoidance_slowdown{1.f};
 
   Enemy(Vector2 _pos) : pos(_pos), move_target(_pos) {
     // The frame is derived from the image which is designed for turning.
@@ -111,7 +112,7 @@ struct Enemy {
 
     Vector2 delta = Vector2Subtract(pos, move_target);
     float total_dist = Vector2Distance(pos, move_target);
-    float move_dist = ENEMY_SPEED * GetFrameTime();
+    float move_dist = ENEMY_SPEED * GetFrameTime() * collision_avoidance_slowdown;
 
     Vector2 old_pos{pos};
 

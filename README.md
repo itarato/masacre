@@ -2,6 +2,8 @@
 
 Silly top-view 2D shooting game.
 
+![Screenshot](./misc/screenshot.png)
+
 Bugs:
 
 - enemies can overlap each other
