@@ -14,14 +14,14 @@
 #include "raylib.h"
 #include "raymath.h"
 
-#define PLAYER_SPEED 400.f
-#define PLAYER_ANGLE_SPEED 300.f
-#define PLAYER_WALL_COLLIDE_ANGLE_ADJUST PI / 3.f
-#define PLAYER_WALL_COLLIDE_DISTANCE_ADJUST 0.5f
-#define PLAYER_MAX_HEALTH 100
-#define PLAYER_STARTER_BULLET_COUNT 100
-#define PLAYER_HEALTH_COLLECT 25
-#define PLAYER_BULLET_COLLECT 50
+constexpr float PLAYER_SPEED = 400.f;
+constexpr float PLAYER_ANGLE_SPEED = 300.f;
+constexpr float PLAYER_WALL_COLLIDE_ANGLE_ADJUST = PI / 3.f;
+constexpr float PLAYER_WALL_COLLIDE_DISTANCE_ADJUST = 0.5f;
+constexpr int PLAYER_MAX_HEALTH = 100;
+constexpr int PLAYER_STARTER_BULLET_COUNT = 100;
+constexpr int PLAYER_HEALTH_COLLECT = 25;
+constexpr int PLAYER_BULLET_COLLECT = 50;
 
 struct Player {
   std::shared_ptr<Vector2> pos = std::make_shared<Vector2>();

@@ -5,10 +5,10 @@
 #include <algorithm>
 #include <deque>
 
-#define PERF_CHART_MAX_VALUES 100
-#define PERF_CHART_BAR_HEIGHT 80.f
-#define PERF_CHART_BAR_WIDTH 4.f
-#define PERF_SAMPLE_RATE 4
+constexpr int PERF_CHART_MAX_VALUES = 100;
+constexpr float PERF_CHART_BAR_HEIGHT = 80.f;
+constexpr float PERF_CHART_BAR_WIDTH = 4.f;
+constexpr int PERF_SAMPLE_RATE = 4;
 
 struct PerfChart {
   std::deque<float> values{};

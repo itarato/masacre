@@ -6,9 +6,9 @@
 #include "raylib.h"
 #include "raymath.h"
 
-#define WORLD_PLAYER_MIDZONE_MARGIN_PERCENTAGE 0.3f
-#define WORLD_RANDOM_SPOT_MAX_ATTEMPTS 32
-#define WORLD_OFFSET_MARGIN 64.f
+constexpr float WORLD_PLAYER_MIDZONE_MARGIN_PERCENTAGE = 0.3f;
+constexpr int WORLD_RANDOM_SPOT_MAX_ATTEMPTS = 32;
+constexpr float WORLD_OFFSET_MARGIN = 64.f;
 
 struct Map {
   Vector2 world_offset{};
@@ -65,8 +65,8 @@ struct Map {
   }
 
   void path_finder_init() {
-    path_finder.cells_w = static_cast<int>(floorf(asset_manager.images[ASSET_MAP_IMAGE].width / CELL_DISTANCE)) + 1;
-    path_finder.cells_h = static_cast<int>(floorf(asset_manager.images[ASSET_MAP_IMAGE].height / CELL_DISTANCE)) + 1;
+    path_finder.cells_w = asset_manager.images[ASSET_MAP_IMAGE].width / CELL_DISTANCE + 1;
+    path_finder.cells_h = asset_manager.images[ASSET_MAP_IMAGE].height / CELL_DISTANCE + 1;
 
     if (path_finder.cells_w * path_finder.cells_w >= MAX_GRID_CELLS) {
       TraceLog(LOG_ERROR, "Map too large");

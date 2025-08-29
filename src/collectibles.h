@@ -7,7 +7,7 @@
 #include "map.h"
 #include "raylib.h"
 
-#define COLLECTIBLE_RADIUS 20.f
+constexpr float COLLECTIBLE_RADIUS = 20.f;
 
 enum class CollectibleType {
   Bullet,

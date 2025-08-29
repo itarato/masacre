@@ -9,24 +9,24 @@
 #include "common.h"
 #include "raylib.h"
 
-#define MAX_GRID_CELLS 10000
-
-#define HEURISTIC_STRATEGY_TAXI_DIST 0b00
-#define HEURISTIC_STRATEGY_EUCLIDEAN_DIST 0b01
-#define HEURISTIC_STRATEGY HEURISTIC_STRATEGY_EUCLIDEAN_DIST
-
 #define PF_CELL_IDX(x, y) (y * cells_w + x)
 
-#define PF_CELL_FLAG_VISITED 0b1
+constexpr int MAX_GRID_CELLS = 10000;
+
+constexpr int HEURISTIC_STRATEGY_TAXI_DIST = 0b00;
+constexpr int HEURISTIC_STRATEGY_EUCLIDEAN_DIST = 0b01;
+constexpr int HEURISTIC_STRATEGY = HEURISTIC_STRATEGY_EUCLIDEAN_DIST;
+
+constexpr int PF_CELL_FLAG_VISITED = 0b1;
 
 // Cells that are not on a hit zone.
-#define PF_CELL_ACCESSIBLE_FLAG 0b01
+constexpr int PF_CELL_ACCESSIBLE_FLAG = 0b01;
 // Cells that are discoverable from `start_pos`.
-#define PF_CELL_DISCOVERABLE_FLAG 0b10
+constexpr int PF_CELL_DISCOVERABLE_FLAG = 0b10;
 
-#define PF_RANDOM_SPOT_MAX_ATTEMPTS 32
+constexpr int PF_RANDOM_SPOT_MAX_ATTEMPTS = 32;
 
-static int8_t NEIGHBOR_MAP[8][2]{
+constexpr int8_t NEIGHBOR_MAP[8][2]{
     {-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1},
 };
 

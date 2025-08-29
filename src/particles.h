@@ -9,7 +9,7 @@
 #include "map.h"
 #include "raylib.h"
 
-#define PARTICLE_SMOKE_SPEED 80.f
+constexpr float PARTICLE_SMOKE_SPEED = 80.f;
 
 struct Particle {
   Vector2 pos{};

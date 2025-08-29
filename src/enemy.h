@@ -9,10 +9,10 @@
 #include "particles.h"
 #include "raylib.h"
 
-#define ENEMY_SPEED 200.f
-#define ENEMY_TARGET_REACH_THRESHOLD 1.f
-#define ENEMY_EXPLOSION_SPEED 200.f
-#define ENEMY_PLAYER_MIN_CHASE_DISTANCE 100.f
+constexpr float ENEMY_SPEED = 200.f;
+constexpr float ENEMY_TARGET_REACH_THRESHOLD = 1.f;
+constexpr float ENEMY_EXPLOSION_SPEED = 200.f;
+constexpr float ENEMY_PLAYER_MIN_CHASE_DISTANCE = 100.f;
 
 struct Enemy {
   u_int64_t object_id;

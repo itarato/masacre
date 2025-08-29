@@ -14,11 +14,11 @@
 #include "player.h"
 #include "raylib.h"
 
-#define ENEMY_SPAWN_COUNT 16
-#define MAX_COLLECTIBLE_HEALTH_COUNT 1
-#define MAX_COLLECTIBLE_BULLET_COUNT 5
-#define ENEMY_JAM_CONTROL_CLOSE CELL_DISTANCE
-#define ENEMY_JAM_CONTROL_TOO_CLOSE (CELL_DISTANCE / 2.f)
+constexpr int ENEMY_SPAWN_COUNT = 16;
+constexpr int MAX_COLLECTIBLE_HEALTH_COUNT = 1;
+constexpr int MAX_COLLECTIBLE_BULLET_COUNT = 5;
+constexpr int ENEMY_JAM_CONTROL_CLOSE = CELL_DISTANCE;
+constexpr float ENEMY_JAM_CONTROL_TOO_CLOSE = CELL_DISTANCE / 2.f;
 
 struct App {
   Player player{};
