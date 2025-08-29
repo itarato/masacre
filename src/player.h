@@ -137,7 +137,7 @@ struct Player {
       unconditional_shoot();
     }
 
-    if (IsKeyDown(KEY_LEFT_ALT)) {
+    if (IsKeyDown(KEY_LEFT_ALT) || IsGamepadButtonDown(0, 8)) {
       rapid_fire_scheduler.update();
       if (rapid_fire_scheduler.did_tick) {
         unconditional_shoot();

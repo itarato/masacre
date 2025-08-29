@@ -84,10 +84,12 @@ struct PathFinder {
     std::vector<PFCell> queue{};
     queue.emplace_back(0.f, heuristic_distance(start, end), start);
 
-    // Visited byte setup:
-    //        ┌ source (index of neighbour_map)
-    //        |  ┌ visited (1: yes, 0: no)
-    // 0bxxxx_bbba
+    /**
+    Visited byte setup:
+           ┌ source (index of neighbour_map)
+           |  ┌ visited (1: yes, 0: no)
+    0bxxxx_bbba
+    */
     u_int8_t visited_cells[MAX_GRID_CELLS]{};
     visited_cells[PF_CELL_IDX(start.x, start.y)] |= PF_CELL_FLAG_VISITED;
 
