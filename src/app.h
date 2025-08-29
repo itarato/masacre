@@ -10,7 +10,7 @@
 #include "enemy.h"
 #include "intrinsic.h"
 #include "map.h"
-#include "particles.h"
+#include "path_finder.h"
 #include "player.h"
 #include "raylib.h"
 
@@ -26,6 +26,7 @@ struct App {
   std::vector<Enemy> enemies{};
   std::vector<Collectible> collectibles{};
   PerfChart perf_chart{};
+  PathFinder path_finder{};
 
   void init() {
     srand(time(nullptr));
@@ -39,13 +40,14 @@ struct App {
     asset_manager.init();
     player.init();
     map.init();
+    path_finder.init(map);
 
     reset();
   }
 
   void reset() {
     map.reset();
-    player.reset(map);
+    player.reset(map, path_finder);
     enemies.clear();
     collectibles.clear();
     game_scope.reset();
@@ -71,7 +73,7 @@ struct App {
 
     player.update(map);
 
-    for (auto& enemy : enemies) enemy.update(*player.pos, map);
+    for (auto& enemy : enemies) enemy.update(*player.pos, map, path_finder);
 
     map.update(*player.pos);
 
@@ -86,14 +88,14 @@ struct App {
     std::erase_if(collectibles, [](const auto& e) { return e.should_be_deleted; });
 
     if (enemies.empty()) {
-      for (int i = 0; i < ENEMY_SPAWN_COUNT; i++) enemies.emplace_back(map.discoverable_random_spot());
+      for (int i = 0; i < ENEMY_SPAWN_COUNT; i++) enemies.emplace_back(discoverable_random_spot());
     }
 
     if (collectible_count_of_type(CollectibleType::Health) < MAX_COLLECTIBLE_HEALTH_COUNT) {
-      collectibles.emplace_back(map.discoverable_random_spot(), CollectibleType::Health);
+      collectibles.emplace_back(discoverable_random_spot(), CollectibleType::Health);
     }
     if (collectible_count_of_type(CollectibleType::Bullet) < MAX_COLLECTIBLE_BULLET_COUNT) {
-      collectibles.emplace_back(map.discoverable_random_spot(), CollectibleType::Bullet);
+      collectibles.emplace_back(discoverable_random_spot(), CollectibleType::Bullet);
     }
 
     perf_chart.update();
@@ -106,10 +108,15 @@ struct App {
     game_scope.draw(map);
     player.draw(map);
     perf_chart.draw();
+    path_finder.draw(map);
     // draw_debug_path_finding(*player.pos);
   }
 
  private:
+  Vector2 discoverable_random_spot() const {
+    return int_vector2_to_vector2(path_finder.discoverable_random_spot());
+  }
+
   int collectible_count_of_type(CollectibleType ty) const {
     int count{0};
     for (auto const& collectible : collectibles) {
@@ -119,7 +126,7 @@ struct App {
   }
 
   void draw_debug_path_finding(Vector2 const& player_pos) const {
-    auto path = map.path_finder.find_path(Vector2Subtract(GetMousePosition(), map.world_offset), player_pos);
+    auto path = path_finder.find_path(Vector2Subtract(GetMousePosition(), map.world_offset), player_pos);
     if (path.empty()) return;
 
     for (unsigned int i = 0; i < path.size() - 1; i++) {

@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "common.h"
+#include "map.h"
 #include "raylib.h"
 
 #define PF_CELL_IDX(x, y) (y * cells_w + x)
@@ -40,6 +41,28 @@ struct PathFinder {
   PathFinder() {
   }
   ~PathFinder() {
+  }
+
+  void init(Map const &map) {
+    cells_w = asset_manager.images[ASSET_MAP_IMAGE].width / CELL_DISTANCE + 1;
+    cells_h = asset_manager.images[ASSET_MAP_IMAGE].height / CELL_DISTANCE + 1;
+
+    if (cells_w * cells_w >= MAX_GRID_CELLS) {
+      TraceLog(LOG_ERROR, "Map too large");
+      exit(EXIT_FAILURE);
+    }
+
+    for (int y = 0; y < cells_h; y++) {
+      for (int x = 0; x < cells_w; x++) {
+        if (map.is_hit(Vector2{static_cast<float>(x * CELL_DISTANCE), static_cast<float>(y * CELL_DISTANCE)})) {
+          cells[y * cells_w + x] = 0;
+        } else {
+          cells[y * cells_w + x] = PF_CELL_ACCESSIBLE_FLAG;
+        }
+      }
+    }
+
+    post_init();
   }
 
   void post_init() {
@@ -174,8 +197,8 @@ struct PathFinder {
     exit(EXIT_FAILURE);
   }
 
-  void draw(Vector2 world_offset) const {
-    // draw_cells_debug(world_offset);
+  void draw(Map const &map) const {
+    // draw_cells_debug(map.world_offset);
   }
 
  private:

@@ -2,7 +2,6 @@
 
 #include "asset_manager.h"
 #include "common.h"
-#include "path_finder.h"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -12,11 +11,8 @@ constexpr float WORLD_OFFSET_MARGIN = 64.f;
 
 struct Map {
   Vector2 world_offset{};
-  PathFinder path_finder{};
 
   void init() {
-    path_finder_init();
-
     reset();
   }
 
@@ -31,7 +27,6 @@ struct Map {
 
   void draw() const {
     DrawTextureV(asset_manager.textures[ASSET_MAP_TEXTURE], world_offset, WHITE);
-    path_finder.draw(world_offset);
   }
 
   void update_world_offset(Vector2 player_pos) {
@@ -64,38 +59,11 @@ struct Map {
     return GetImageColor(asset_manager.images[ASSET_MAP_IMAGE], point.x, point.y).r < 255;
   }
 
-  void path_finder_init() {
-    path_finder.cells_w = asset_manager.images[ASSET_MAP_IMAGE].width / CELL_DISTANCE + 1;
-    path_finder.cells_h = asset_manager.images[ASSET_MAP_IMAGE].height / CELL_DISTANCE + 1;
-
-    if (path_finder.cells_w * path_finder.cells_w >= MAX_GRID_CELLS) {
-      TraceLog(LOG_ERROR, "Map too large");
-      exit(EXIT_FAILURE);
-    }
-
-    for (int y = 0; y < path_finder.cells_h; y++) {
-      for (int x = 0; x < path_finder.cells_w; x++) {
-        if (is_hit(Vector2{static_cast<float>(x * CELL_DISTANCE), static_cast<float>(y * CELL_DISTANCE)})) {
-          path_finder.cells[y * path_finder.cells_w + x] = 0;
-        } else {
-          path_finder.cells[y * path_finder.cells_w + x] = PF_CELL_ACCESSIBLE_FLAG;
-        }
-      }
-    }
-
-    path_finder.post_init();
-  }
-
   int width() const {
     return asset_manager.images[ASSET_MAP_IMAGE].width;
   }
 
   int height() const {
     return asset_manager.images[ASSET_MAP_IMAGE].height;
-  }
-
-  Vector2 discoverable_random_spot() const {
-    IntVector2 pos = path_finder.discoverable_random_spot();
-    return Vector2{static_cast<float>(pos.x * CELL_DISTANCE), static_cast<float>(pos.y * CELL_DISTANCE)};
   }
 };

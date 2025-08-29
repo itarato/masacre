@@ -7,6 +7,7 @@
 #include "game_scope.h"
 #include "map.h"
 #include "particles.h"
+#include "path_finder.h"
 #include "raylib.h"
 
 constexpr float ENEMY_SPEED = 200.f;
@@ -36,10 +37,10 @@ struct Enemy {
     object_id = global_object_id++;
   }
 
-  void update(Vector2 const &player_pos, Map const &map) {
+  void update(Vector2 const &player_pos, Map const &map, PathFinder const &path_finder) {
     if (!is_dead) {
       if (Vector2Distance(pos, move_target) <= ENEMY_TARGET_REACH_THRESHOLD) {
-        update_move_target(player_pos, map);
+        update_move_target(player_pos, map, path_finder);
       } else {
         update_movement_towards_target(player_pos);
       }
@@ -102,10 +103,10 @@ struct Enemy {
   }
 
  private:
-  void update_move_target(Vector2 const &player_pos, Map const &map) {
+  void update_move_target(Vector2 const &player_pos, Map const &map, PathFinder const &path_finder) {
     if (Vector2Distance(pos, player_pos) <= ENEMY_PLAYER_MIN_CHASE_DISTANCE) return;
 
-    auto path = map.path_finder.find_path(pos, player_pos);
+    auto path = path_finder.find_path(pos, player_pos);
     if (path.empty()) {
       TraceLog(LOG_INFO, "No path from enemy to player");
       return;

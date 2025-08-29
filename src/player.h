@@ -11,6 +11,7 @@
 #include "common.h"
 #include "map.h"
 #include "particles.h"
+#include "path_finder.h"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -43,11 +44,11 @@ struct Player {
     circle_frame_radius = asset_manager.textures[ASSET_PLAYER_TEXTURE].width / 2.f;
   }
 
-  void reset(Map const &map) {
+  void reset(Map const &map, PathFinder const &path_finder) {
     angle = 270.f;  // Up.
     bullets.clear();
-    pos->x = map.path_finder.start_pos.x * CELL_DISTANCE;
-    pos->y = map.path_finder.start_pos.y * CELL_DISTANCE;
+    pos->x = path_finder.start_pos.x * CELL_DISTANCE;
+    pos->y = path_finder.start_pos.y * CELL_DISTANCE;
     bullet_count = PLAYER_STARTER_BULLET_COUNT;
     health = PLAYER_MAX_HEALTH;
     kill_count = 0;
