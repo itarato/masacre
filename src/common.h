@@ -16,8 +16,8 @@ static u_int64_t global_object_id{0};
 /**
  * Returns a random between 0.0 and 1.0 (both included).
  */
-float randf() {
-  return static_cast<float>(rand() % 1001) / 1000.0;
+inline float randf() {
+  return static_cast<float>(rand() % 1001) / 1000.f;
 }
 
 struct IntVector2 {
@@ -33,7 +33,7 @@ constexpr float int_vector2_dist(IntVector2 lhs, IntVector2 rhs) {
   return sqrtf(powf(lhs.x - rhs.x, 2.f) + powf(lhs.y - rhs.y, 2.f));
 }
 
-Vector2 int_vector2_to_vector2(IntVector2 p) {
+inline Vector2 int_vector2_to_vector2(IntVector2 p) {
   return Vector2{static_cast<float>(p.x * CELL_DISTANCE), static_cast<float>(p.y * CELL_DISTANCE)};
 }
 
@@ -45,7 +45,7 @@ struct PFCell {
   PFCell(float _prefix, float _suffix, IntVector2 _p) : prefix(_prefix), suffix(_suffix), p(_p) {
   }
 
-  constexpr float total() const {
+  [[nodiscard]] constexpr float total() const {
     return prefix + suffix;
   }
 

@@ -144,7 +144,7 @@ struct BurnParticleGroup final : Particle {
   RepeatedTask particle_repeater{0.02};
   ParticleManager particle_manager{};
 
-  BurnParticleGroup(std::shared_ptr<Vector2> _player_pos) : Particle(), player_pos(_player_pos) {
+  explicit BurnParticleGroup(std::shared_ptr<Vector2> _player_pos) : Particle(), player_pos(std::move(_player_pos)) {
   }
 
   void update() override {

@@ -34,7 +34,7 @@ struct Bullet {
     }
   }
 
-  Vector2 get_rel_pos(Vector2 const &world_offset) const {
+  [[nodiscard]] Vector2 get_rel_pos(Vector2 const &world_offset) const {
     return Vector2Add(pos, world_offset);
   }
 
@@ -42,7 +42,7 @@ struct Bullet {
     should_be_deleted = true;
   }
 
-  float attack_damage() const {
+  static constexpr float attack_damage() {
     return 10.0f;
   }
 };

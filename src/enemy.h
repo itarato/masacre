@@ -29,7 +29,7 @@ struct Enemy {
   float collision_avoidance_slowdown{1.f};
   RepeatedTask smoke_particle_scheduler{0.1};
 
-  Enemy(Vector2 _pos) : pos(_pos), move_target(_pos) {
+  explicit Enemy(Vector2 _pos) : pos(_pos), move_target(_pos) {
     // The frame is derived from the image which is designed for turning.
     // Once the turning works, let's reduce the wheel size so we can use it to assume a frame size.
     circle_frame_radius = asset_manager.textures[ASSET_ENEMY_WHEEL_TEXTURE].width / 3.f;
@@ -92,11 +92,11 @@ struct Enemy {
     }
   }
 
-  bool should_be_deleted() const {
+  [[nodiscard]] bool should_be_deleted() const {
     return is_dead && dying_lifetime.is_completed();
   }
 
-  float attack_damage() {
+  [[nodiscard]] float attack_damage() const {
     if (is_dead) return 0.f;
 
     return 10.f * GetFrameTime();
