@@ -38,45 +38,19 @@ struct PathFinder {
 
   IntVector2 start_pos{};
 
-  PathFinder() {
-  }
-  ~PathFinder() {
-  }
-
   void init(Map const &map) {
-    cells_w = asset_manager.images[ASSET_MAP_IMAGE].width / CELL_DISTANCE + 1;
-    cells_h = asset_manager.images[ASSET_MAP_IMAGE].height / CELL_DISTANCE + 1;
-
-    if (cells_w * cells_w >= MAX_GRID_CELLS) {
-      TraceLog(LOG_ERROR, "Map too large");
-      exit(EXIT_FAILURE);
-    }
-
-    for (int y = 0; y < cells_h; y++) {
-      for (int x = 0; x < cells_w; x++) {
-        if (map.is_hit(Vector2{static_cast<float>(x * CELL_DISTANCE), static_cast<float>(y * CELL_DISTANCE)})) {
-          cells[y * cells_w + x] = 0;
-        } else {
-          cells[y * cells_w + x] = PF_CELL_ACCESSIBLE_FLAG;
-        }
-      }
-    }
-
-    post_init();
-  }
-
-  void post_init() {
+    init_available_cells(map);
     init_start_pos();
     init_discoverable_cells();
   }
 
-  std::vector<IntVector2> find_path(Vector2 start, Vector2 end) const {
+  [[nodiscard]] std::vector<IntVector2> find_path(Vector2 start, Vector2 end) const {
     IntVector2 start_normalized = closest_available_cell_idx_from_coord(start);
     IntVector2 end_normalized = closest_available_cell_idx_from_coord(end);
     return find_path(start_normalized, end_normalized);
   }
 
-  std::vector<IntVector2> find_path(IntVector2 start, IntVector2 end) const {
+  [[nodiscard]] std::vector<IntVector2> find_path(IntVector2 start, IntVector2 end) const {
     if (is_out_of_bounds(start)) {
       TraceLog(LOG_ERROR, "[PF] start is out of bound: %d:%d.", start.x, start.y);
       return {};
@@ -158,7 +132,7 @@ struct PathFinder {
     return {};
   }
 
-  IntVector2 closest_available_cell_idx_from_coord(Vector2 coord) const {
+  [[nodiscard]] IntVector2 closest_available_cell_idx_from_coord(Vector2 coord) const {
     auto possible_cells = ordered_cell_indices_from_coord(coord);
     for (auto const &cell : possible_cells) {
       if (!is_out_of_bounds(cell) && is_discoverable(cell)) return cell;
@@ -172,7 +146,7 @@ struct PathFinder {
     return possible_cells.front();
   }
 
-  float heuristic_distance(IntVector2 lhs, IntVector2 rhs) const {
+  [[nodiscard]] static float heuristic_distance(IntVector2 lhs, IntVector2 rhs) {
     switch (HEURISTIC_STRATEGY) {
       case HEURISTIC_STRATEGY_TAXI_DIST:
         return (float)abs(lhs.x - rhs.x) + abs(lhs.y - rhs.y);
@@ -184,7 +158,7 @@ struct PathFinder {
     }
   }
 
-  IntVector2 discoverable_random_spot() const {
+  [[nodiscard]] IntVector2 discoverable_random_spot() const {
     IntVector2 pos;
 
     for (int i = 0; i < PF_RANDOM_SPOT_MAX_ATTEMPTS; i++) {
@@ -202,19 +176,19 @@ struct PathFinder {
   }
 
  private:
-  bool is_out_of_bounds(IntVector2 const &p) const {
+  [[nodiscard]] bool is_out_of_bounds(IntVector2 const &p) const {
     return p.x < 0 || p.y < 0 || p.x >= cells_w || p.y >= cells_h;
   }
 
-  bool is_accessible(IntVector2 const &p) const {
+  [[nodiscard]] bool is_accessible(IntVector2 const &p) const {
     return (cells[PF_CELL_IDX(p.x, p.y)] & PF_CELL_ACCESSIBLE_FLAG) > 0;
   }
 
-  bool is_discoverable(IntVector2 const &p) const {
+  [[nodiscard]] bool is_discoverable(IntVector2 const &p) const {
     return (cells[PF_CELL_IDX(p.x, p.y)] & PF_CELL_DISCOVERABLE_FLAG) > 0;
   }
 
-  std::vector<IntVector2> backtrack_path(u_int8_t *visited_cells, IntVector2 const &start,
+  std::vector<IntVector2> backtrack_path(const u_int8_t *visited_cells, IntVector2 const &start,
                                          IntVector2 const &end) const {
     std::vector<IntVector2> out{};
     IntVector2 current_coord = end;
@@ -231,6 +205,27 @@ struct PathFinder {
     }
 
     return out;
+  }
+
+  bool init_available_cells(Map const &map) {
+    cells_w = asset_manager.images[ASSET_MAP_IMAGE].width / CELL_DISTANCE + 1;
+    cells_h = asset_manager.images[ASSET_MAP_IMAGE].height / CELL_DISTANCE + 1;
+
+    if (cells_w * cells_w >= MAX_GRID_CELLS) {
+      TraceLog(LOG_ERROR, "Map too large");
+      exit(EXIT_FAILURE);
+    }
+
+    for (int y = 0; y < cells_h; y++) {
+      for (int x = 0; x < cells_w; x++) {
+        if (map.is_hit(Vector2{static_cast<float>(x * CELL_DISTANCE), static_cast<float>(y * CELL_DISTANCE)})) {
+          cells[y * cells_w + x] = 0;
+        } else {
+          cells[y * cells_w + x] = PF_CELL_ACCESSIBLE_FLAG;
+        }
+      }
+    }
+    return false;
   }
 
   void init_start_pos() {

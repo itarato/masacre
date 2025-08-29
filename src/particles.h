@@ -15,11 +15,10 @@ struct Particle {
   Vector2 pos{};
   bool should_be_deleted{false};
 
-  Particle() {
-  }
+  Particle() = default;
   explicit Particle(Vector2 _pos) : pos(_pos) {
   }
-  virtual ~Particle() {};
+  virtual ~Particle() = default;
 
   virtual void draw(Map const &map) const = 0;
   virtual void update() = 0;

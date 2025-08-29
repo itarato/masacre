@@ -1,7 +1,6 @@
 #pragma once
 
 #include "asset_manager.h"
-#include "common.h"
 #include "raylib.h"
 #include "raymath.h"
 
