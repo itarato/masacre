@@ -47,7 +47,7 @@ struct App {
 
   void reset() {
     map.reset();
-    player.reset(map, path_finder);
+    player.reset(path_finder);
     enemies.clear();
     collectibles.clear();
     game_scope.reset();

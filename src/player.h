@@ -42,7 +42,7 @@ struct Player {
     circle_frame_radius = asset_manager.textures[ASSET_PLAYER_TEXTURE].width / 2.f;
   }
 
-  void reset(Map const &map, PathFinder const &path_finder) {
+  void reset(PathFinder const &path_finder) {
     angle = 270.f;  // Up.
     bullets.clear();
     pos->x = path_finder.start_pos.x * CELL_DISTANCE;
