@@ -34,6 +34,7 @@ struct App {
     InitWindow(WINDOW_W, WINDOW_H, "Masacre");
     InitAudioDevice();
     SetTargetFPS(GetMonitorRefreshRate(0));
+    // SetTargetFPS(60);
 
     asset_manager.init();
     player.init();
@@ -76,54 +77,9 @@ struct App {
 
     game_scope.update(map, player);
 
-    // Collision checks.
-    for (auto& enemy : enemies) {
-      if (enemy.is_dead) continue;
-
-      for (auto& bullet : player.bullets) {
-        if (CheckCollisionPointCircle(bullet.pos, enemy.pos, enemy.circle_frame_radius)) {
-          enemy.kill();
-          bullet.kill();
-          player.kill_count++;
-        }
-      }
-
-      if (CheckCollisionCircles(*player.pos, player.circle_frame_radius, enemy.pos, enemy.circle_frame_radius)) {
-        player.hurt(enemy.attack_damage());
-      }
-    }
-
-    for (auto& collectible : collectibles) {
-      if (CheckCollisionCircles(collectible.pos, collectible.circle_frame_radius, *player.pos,
-                                player.circle_frame_radius)) {
-        collectible.should_be_deleted = true;
-        player.consume(collectible);
-
-        PlaySound(asset_manager.sounds[ASSET_SOUND_PICKUP]);
-      }
-    }
-
-    // Enemy jam control.
-    for (auto& enemy : enemies) enemy.collision_avoidance_slowdown = 1.f;
-    for (auto& enemy_lhs : enemies) {
-      for (auto& enemy_rhs : enemies) {
-        if (&enemy_lhs == &enemy_rhs) continue;
-
-        if (Vector2Distance(enemy_lhs.pos, enemy_rhs.pos) < ENEMY_JAM_CONTROL_TOO_CLOSE) {
-          if (Vector2Distance(enemy_lhs.pos, *player.pos) < Vector2Distance(enemy_rhs.pos, *player.pos)) {
-            enemy_rhs.collision_avoidance_slowdown = 0.f;
-          } else {
-            enemy_lhs.collision_avoidance_slowdown *= 0.f;
-          }
-        } else if (Vector2Distance(enemy_lhs.pos, enemy_rhs.pos) < ENEMY_JAM_CONTROL_CLOSE) {
-          if (Vector2Distance(enemy_lhs.pos, *player.pos) < Vector2Distance(enemy_rhs.pos, *player.pos)) {
-            enemy_rhs.collision_avoidance_slowdown *= 0.9f;
-          } else {
-            enemy_lhs.collision_avoidance_slowdown *= 0.9f;
-          }
-        }
-      }
-    }
+    update_enemy_collision_checks();
+    update_collectible_collisions();
+    update_enemy_jam_control();
 
     // Delete disposables.
     std::erase_if(enemies, [](const auto& e) { return e.should_be_deleted(); });
@@ -145,16 +101,11 @@ struct App {
 
   void draw() const {
     map.draw();
-
     for (auto const& enemy : enemies) enemy.draw(map, *player.pos);
     for (auto const& collectible : collectibles) collectible.draw(map);
-
     game_scope.draw(map);
-
     player.draw(map);
-
     perf_chart.draw();
-
     // draw_debug_path_finding(*player.pos);
   }
 
@@ -174,6 +125,66 @@ struct App {
     for (unsigned int i = 0; i < path.size() - 1; i++) {
       DrawLineEx(Vector2Add(int_vector2_to_vector2(path[i]), map.world_offset),
                  Vector2Add(int_vector2_to_vector2(path[i + 1]), map.world_offset), 3.f, MAROON);
+    }
+  }
+
+  void update_enemy_collision_checks() {
+    for (auto& enemy : enemies) {
+      if (enemy.is_dead) continue;
+
+      for (auto& bullet : player.bullets) {
+        if (CheckCollisionPointCircle(bullet.pos, enemy.pos, enemy.circle_frame_radius)) {
+          enemy.kill();
+          bullet.kill();
+          player.kill_count++;
+        }
+      }
+
+      if (CheckCollisionCircles(*player.pos, player.circle_frame_radius, enemy.pos, enemy.circle_frame_radius)) {
+        player.hurt(enemy.attack_damage());
+      }
+    }
+  }
+
+  void update_collectible_collisions() {
+    for (auto& collectible : collectibles) {
+      if (CheckCollisionCircles(collectible.pos, collectible.circle_frame_radius, *player.pos,
+                                player.circle_frame_radius)) {
+        collectible.should_be_deleted = true;
+        player.consume(collectible);
+
+        PlaySound(asset_manager.sounds[ASSET_SOUND_PICKUP]);
+      }
+    }
+  }
+
+  void update_enemy_jam_control() {
+    for (auto& enemy : enemies) enemy.collision_avoidance_slowdown = 1.f;
+    for (auto& enemy_lhs : enemies) {
+      for (auto& enemy_rhs : enemies) {
+        if (enemy_lhs.is_dead || enemy_rhs.is_dead) continue;
+        if (enemy_lhs.object_id == enemy_rhs.object_id) continue;
+
+        if (Vector2Equals(enemy_lhs.pos, enemy_rhs.pos)) {
+          if (enemy_lhs.object_id < enemy_rhs.object_id) {
+            enemy_lhs.collision_avoidance_slowdown *= 0.f;
+          } else {
+            enemy_rhs.collision_avoidance_slowdown = 0.f;
+          }
+        } else if (Vector2Distance(enemy_lhs.pos, enemy_rhs.pos) < ENEMY_JAM_CONTROL_TOO_CLOSE) {
+          if (Vector2Distance(enemy_lhs.pos, *player.pos) < Vector2Distance(enemy_rhs.pos, *player.pos)) {
+            enemy_rhs.collision_avoidance_slowdown = 0.f;
+          } else {
+            enemy_lhs.collision_avoidance_slowdown *= 0.f;
+          }
+        } else if (Vector2Distance(enemy_lhs.pos, enemy_rhs.pos) < ENEMY_JAM_CONTROL_CLOSE) {
+          if (Vector2Distance(enemy_lhs.pos, *player.pos) < Vector2Distance(enemy_rhs.pos, *player.pos)) {
+            enemy_rhs.collision_avoidance_slowdown *= 0.9f;
+          } else {
+            enemy_lhs.collision_avoidance_slowdown *= 0.9f;
+          }
+        }
+      }
     }
   }
 };

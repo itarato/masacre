@@ -7,10 +7,11 @@
 
 constexpr int WINDOW_W = 800;
 constexpr int WINDOW_H = 800;
+constexpr float BULLET_SPEED = 800.f;
+constexpr int CELL_DISTANCE = 50;
+constexpr int REFERENCE_FPS = 144;
 
-#define BULLET_SPEED 800.f
-#define CELL_DISTANCE 50
-#define REFERENCE_FPS 144
+static u_int64_t global_object_id{0};
 
 /**
  * Returns a random between 0.0 and 1.0 (both included).
@@ -79,10 +80,12 @@ struct RepeatedTask {
   double last_tick;
 
   explicit RepeatedTask(double _interval_seconds) : interval_seconds(_interval_seconds), last_tick(GetTime()) {
+    update_jitter();
   }
 
   explicit RepeatedTask(double _interval_seconds, double _additional_jitter)
       : interval_seconds(_interval_seconds), additional_jitter(_additional_jitter), last_tick(GetTime()) {
+    update_jitter();
   }
 
   void pause() {
@@ -106,10 +109,13 @@ struct RepeatedTask {
       did_tick = true;
       last_tick = GetTime();
 
-      if (additional_jitter > 0.f) {
-        current_jitter = randf() * additional_jitter;
-      }
+      if (additional_jitter > 0.f) update_jitter();
     }
+  }
+
+ private:
+  void update_jitter() {
+    current_jitter = randf() * additional_jitter;
   }
 };
 
@@ -160,6 +166,7 @@ std::vector<IntVector2> ordered_cell_indices_from_coord(Vector2 const &p) {
   return out;
 }
 
+// Draws texture at the center point as origin.
 void draw_texture(Texture2D const &texture, Vector2 const &pos, float angle_deg) {
   DrawTexturePro(texture, {0.f, 0.f, (float)texture.width, (float)texture.height},
                  {pos.x, pos.y, (float)texture.width, (float)texture.height},
@@ -168,4 +175,8 @@ void draw_texture(Texture2D const &texture, Vector2 const &pos, float angle_deg)
 
 float fps_independent_multiplier() {
   return static_cast<float>(REFERENCE_FPS) / static_cast<float>(GetFPS());
+}
+
+void fps_independent_multiply(float *v, float mul) {
+  *v *= powf(mul, fps_independent_multiplier());
 }

@@ -15,6 +15,7 @@
 #define ENEMY_PLAYER_MIN_CHASE_DISTANCE 100.f
 
 struct Enemy {
+  u_int64_t object_id;
   Vector2 pos;
   Vector2 move_target{};
   float circle_frame_radius{};
@@ -31,6 +32,8 @@ struct Enemy {
     // The frame is derived from the image which is designed for turning.
     // Once the turning works, let's reduce the wheel size so we can use it to assume a frame size.
     circle_frame_radius = asset_manager.textures[ASSET_ENEMY_WHEEL_TEXTURE].width / 3.f;
+
+    object_id = global_object_id++;
   }
 
   void update(Vector2 const &player_pos, Map const &map) {

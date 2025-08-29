@@ -83,9 +83,8 @@ struct ExplosionParticle final : Particle {
     pos.x += v.x;
     pos.y += v.y;
 
-    float _fps_independent_multiplier = fps_independent_multiplier();
-    v.x *= powf(0.99f, _fps_independent_multiplier);
-    v.y *= powf(0.99f, _fps_independent_multiplier);
+    fps_independent_multiply(&v.x, 0.99f);
+    fps_independent_multiply(&v.y, 0.99f);
 
     if (lifetime.is_completed()) should_be_deleted = true;
   }
@@ -114,7 +113,7 @@ struct StraightLineParticle final : Particle {
     pos.x += cosf(angle_rad) * speed * GetFrameTime();
     pos.y += sinf(angle_rad) * speed * GetFrameTime();
 
-    if (speed_multiplier) speed *= powf(speed_multiplier, fps_independent_multiplier());
+    if (speed_multiplier < 1.0f) fps_independent_multiply(&speed, speed_multiplier);
 
     if (lifetime.is_completed()) should_be_deleted = true;
   }

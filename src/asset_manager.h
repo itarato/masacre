@@ -1,9 +1,7 @@
 #pragma once
 
-#include <string>
 #include <unordered_map>
 
-#include "common.h"
 #include "raylib.h"
 
 #define ASSET_PLAYER_TEXTURE 0

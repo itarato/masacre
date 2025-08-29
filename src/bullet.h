@@ -16,7 +16,6 @@ struct Bullet {
   }
 
   void draw(Map const &map) const {
-    // DrawCircleV(get_rel_pos(map.world_offset), 4.f, DARKGREEN);
     draw_texture(asset_manager.textures[ASSET_BULLET_TEXTURE], Vector2Add(pos, map.world_offset), angle_deg);
   }
 
@@ -43,7 +42,7 @@ struct Bullet {
     should_be_deleted = true;
   }
 
-  float attach_damage() const {
+  float attack_damage() const {
     return 10.0f;
   }
 };

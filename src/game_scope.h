@@ -21,7 +21,7 @@ struct GameScope {
     for (auto &bullet : enemy_bullets) {
       if (CheckCollisionPointCircle(bullet.pos, *player.pos, player.circle_frame_radius)) {
         bullet.kill();
-        player.hurt(bullet.attach_damage());
+        player.hurt(bullet.attack_damage());
         player.particle_manager.particles.emplace_back(std::make_unique<BurnParticleGroup>(player.pos));
       }
     }
