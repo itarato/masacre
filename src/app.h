@@ -2,7 +2,7 @@
 
 #include <cstdlib>
 #include <ctime>
-#include <vector>
+#include <list>
 
 #include "asset_manager.h"
 #include "collectibles.h"
@@ -10,6 +10,7 @@
 #include "enemy.h"
 #include "intrinsic.h"
 #include "map.h"
+#include "minimap.h"
 #include "path_finder.h"
 #include "player.h"
 #include "raylib.h"
@@ -23,10 +24,11 @@ constexpr float ENEMY_JAM_CONTROL_TOO_CLOSE = CELL_DISTANCE / 2.f;
 struct App {
   Player player{};
   Map map{};
-  std::vector<Enemy> enemies{};
-  std::vector<Collectible> collectibles{};
+  std::list<Enemy> enemies{};
+  std::list<Collectible> collectibles{};
   PerfChart perf_chart{};
   PathFinder path_finder{};
+  Minimap minimap{};
 
   void init() {
     srand(time(nullptr));
@@ -109,6 +111,7 @@ struct App {
     player.draw(map);
     perf_chart.draw();
     path_finder.draw(map);
+    minimap.draw(map, player, enemies);
     // draw_debug_path_finding(*player.pos);
   }
 
