@@ -176,19 +176,22 @@ struct Player {
       had_movement = true;
     }
 
-    if (IsGamepadAvailable(0)) {
-      float move_vertical_axis_fwd = GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_TRIGGER);
-      if (move_vertical_axis_fwd > -1.f) {
-        velocity += GetFrameTime() * 500.f * ((move_vertical_axis_fwd + 1.f) / 2.f);
-        had_movement = true;
-      }
-
-      float move_vertical_axis_bwd = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_TRIGGER);
-      if (move_vertical_axis_bwd > -1.f) {
-        velocity -= GetFrameTime() * 500.f * ((move_vertical_axis_bwd + 1.f) / 2.f);
-        had_movement = true;
-      }
-    }
+    // Disabling gamepad - the keyboard is pretending to be one and the axis is 0.0 instead of -1.0 as default state
+    // which makes a movement triggered which prevents slowing down.
+    // if (IsGamepadAvailable(0)) {
+    // TraceLog(LOG_INFO, "GP0=%.2f %s", GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_TRIGGER), GetGamepadName(0));
+    //   float move_vertical_axis_fwd = GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_TRIGGER);
+    //   if (move_vertical_axis_fwd > -1.f) {
+    //     velocity += GetFrameTime() * 500.f * ((move_vertical_axis_fwd + 1.f) / 2.f);
+    //     had_movement = true;
+    //   }
+    //
+    //   float move_vertical_axis_bwd = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_TRIGGER);
+    //   if (move_vertical_axis_bwd > -1.f) {
+    //     velocity -= GetFrameTime() * 500.f * ((move_vertical_axis_bwd + 1.f) / 2.f);
+    //     had_movement = true;
+    //   }
+    // }
 
     // Apply velocity + angle.
     pos->x += cosf(angle * DEG2RAD) * velocity * GetFrameTime();
