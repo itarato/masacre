@@ -5,6 +5,8 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#define XY(vector2) vector2.x, vector2.y
+
 constexpr int WINDOW_W = 800;
 constexpr int WINDOW_H = 800;
 constexpr float BULLET_SPEED = 800.f;
@@ -118,6 +120,11 @@ struct RepeatedTask {
     current_jitter = randf() * additional_jitter;
   }
 };
+
+float smoothstep(float current, float goal, float rate, float threshold = 0.1f) {
+  if (abs(goal - current) < threshold) return goal;
+  return current + rate * (goal - current);
+}
 
 constexpr Vector2 point_move_with_angle_and_distance(Vector2 p, float angle_rad, float dist) {
   return Vector2{p.x + cosf(angle_rad) * dist, p.y + sinf(angle_rad) * dist};

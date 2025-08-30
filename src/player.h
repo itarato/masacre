@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <cmath>
 #include <memory>
 #include <vector>
 
@@ -13,10 +15,10 @@
 #include "raylib.h"
 #include "raymath.h"
 
-constexpr float PLAYER_SPEED = 400.f;
+constexpr float PLAYER_MAX_SPEED = 400.f;
 constexpr float PLAYER_ANGLE_SPEED = 300.f;
 constexpr float PLAYER_WALL_COLLIDE_ANGLE_ADJUST = PI / 3.f;
-constexpr float PLAYER_WALL_COLLIDE_DISTANCE_ADJUST = 0.5f;
+constexpr float PLAYER_WALL_COLLIDE_DISTANCE_ADJUST = 1.0f;
 constexpr int PLAYER_MAX_HEALTH = 100;
 constexpr int PLAYER_STARTER_BULLET_COUNT = 100;
 constexpr int PLAYER_HEALTH_COLLECT = 25;
@@ -25,10 +27,10 @@ constexpr int PLAYER_BULLET_COLLECT = 50;
 struct Player {
   std::shared_ptr<Vector2> pos = std::make_shared<Vector2>();
   float circle_frame_radius{};
-  // Degree.
-  float angle;
+  float angle{};         // Degree.
+  float target_angle{};  // Degree.
+  float velocity{};
   std::vector<Bullet> bullets{};
-
   int bullet_count{};
   float health{};
   int kill_count{};
@@ -44,6 +46,8 @@ struct Player {
 
   void reset(PathFinder const &path_finder) {
     angle = 270.f;  // Up.
+    target_angle = 270.f;
+    velocity = 0.f;
     bullets.clear();
     pos->x = path_finder.start_pos.x * CELL_DISTANCE;
     pos->y = path_finder.start_pos.y * CELL_DISTANCE;
@@ -87,10 +91,11 @@ struct Player {
 
     // Draw main player.
     if (!should_be_deleted()) {
-      draw_texture(asset_manager.textures[ASSET_PLAYER_TEXTURE], screen_relative_center(map.world_offset), angle);
+      draw_texture(asset_manager.textures[ASSET_PLAYER_TEXTURE], screen_relative_center(map.world_offset),
+                   target_angle);
     } else {
       draw_texture(asset_manager.textures[ASSET_PLAYER_BROKEN_TEXTURE], screen_relative_center(map.world_offset),
-                   angle);
+                   target_angle);
     }
 
     // Draw HUD.
@@ -123,11 +128,13 @@ struct Player {
   }
 
   void update_rotation() {
-    if (IsKeyDown(KEY_LEFT)) angle -= PLAYER_ANGLE_SPEED * GetFrameTime();
-    if (IsKeyDown(KEY_RIGHT)) angle += PLAYER_ANGLE_SPEED * GetFrameTime();
+    if (IsKeyDown(KEY_LEFT)) target_angle -= PLAYER_ANGLE_SPEED * GetFrameTime();
+    if (IsKeyDown(KEY_RIGHT)) target_angle += PLAYER_ANGLE_SPEED * GetFrameTime();
 
-    float turn_axis = GetGamepadAxisMovement(0, 0);
-    if (turn_axis != 0.f) angle += PLAYER_ANGLE_SPEED * GetFrameTime() * turn_axis;
+    if (IsGamepadAvailable(0)) {
+      float turn_axis = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X);
+      if (turn_axis != 0.f) target_angle += PLAYER_ANGLE_SPEED * GetFrameTime() * turn_axis;
+    }
   }
 
   void update_shooting() {
@@ -148,7 +155,7 @@ struct Player {
   void unconditional_shoot() {
     bullet_count--;
 
-    float bullet_angle_rad = angle * DEG2RAD;
+    float bullet_angle_rad = target_angle * DEG2RAD;
     Vector2 bullet_v{cosf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime(),
                      sinf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime()};
     bullets.emplace_back(*pos, bullet_v);
@@ -159,42 +166,68 @@ struct Player {
   void update_movement(Map const &map) {
     const Vector2 old_pos = *pos;
 
-    if (IsKeyDown(KEY_UP)) move_to_relative_direction(0.f, 1.f);
-    if (IsKeyDown(KEY_DOWN)) move_to_relative_direction(PI, 1.f);
+    bool had_movement = false;
+    if (IsKeyDown(KEY_UP)) {
+      velocity += GetFrameTime() * 500.f;
+      had_movement = true;
+    }
+    if (IsKeyDown(KEY_DOWN)) {
+      velocity -= GetFrameTime() * 500.f;
+      had_movement = true;
+    }
 
-    if (IsKeyDown(KEY_A)) move_to_relative_direction(-PI / 2.f, 1.f);
-    if (IsKeyDown(KEY_D)) move_to_relative_direction(PI / 2.f, 1.f);
+    if (IsGamepadAvailable(0)) {
+      float move_vertical_axis_fwd = GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_TRIGGER);
+      if (move_vertical_axis_fwd > -1.f) {
+        velocity += GetFrameTime() * 500.f * ((move_vertical_axis_fwd + 1.f) / 2.f);
+        had_movement = true;
+      }
 
-    float move_vertical_axis_fwd = GetGamepadAxisMovement(0, 5);
-    if (move_vertical_axis_fwd > -1.f) move_to_relative_direction(0.f, (move_vertical_axis_fwd + 1.f) / 2.f);
+      float move_vertical_axis_bwd = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_TRIGGER);
+      if (move_vertical_axis_bwd > -1.f) {
+        velocity -= GetFrameTime() * 500.f * ((move_vertical_axis_bwd + 1.f) / 2.f);
+        had_movement = true;
+      }
+    }
 
-    float move_vertical_axis_bwd = GetGamepadAxisMovement(0, 4);
-    if (move_vertical_axis_bwd > -1.f) move_to_relative_direction(PI, (move_vertical_axis_bwd + 1.f) / 2.f);
+    // Apply velocity + angle.
+    pos->x += cosf(angle * DEG2RAD) * velocity * GetFrameTime();
+    pos->y += sinf(angle * DEG2RAD) * velocity * GetFrameTime();
 
-    float move_horizontal_axis = GetGamepadAxisMovement(0, 2);
-    if (move_horizontal_axis != 0.f) move_to_relative_direction(-PI / 2.f, -move_horizontal_axis / 2.f);
+    // Clamp velocity.
+    if (velocity > PLAYER_MAX_SPEED) velocity = PLAYER_MAX_SPEED;
+    if (velocity < -PLAYER_MAX_SPEED) velocity = -PLAYER_MAX_SPEED;
+
+    // Slowdown.
+    if (had_movement) {
+      angle = smoothstep(angle, target_angle, 0.1f);
+    } else {
+      fps_independent_multiply(&velocity, 0.98f);
+
+      if (fabs(velocity) < 60.f) velocity = 0.f;
+    }
 
     if (!Vector2Equals(*pos, old_pos) && map.is_hit(*pos)) {
-      float move_angle_rad = abs_angle_of_points(old_pos, *pos);
+      float angle_left_attempt = (angle * DEG2RAD) - PLAYER_WALL_COLLIDE_ANGLE_ADJUST;
+      Vector2 left_attempt = point_move_with_angle_and_distance(old_pos, angle_left_attempt, 300.f * GetFrameTime());
 
-      float dist = Vector2Distance(old_pos, *pos);
-      float angle_left_attempt = move_angle_rad - PLAYER_WALL_COLLIDE_ANGLE_ADJUST;
-      Vector2 left_attempt =
-          point_move_with_angle_and_distance(old_pos, angle_left_attempt, dist * PLAYER_WALL_COLLIDE_DISTANCE_ADJUST);
+      float angle_right_attempt = (angle * DEG2RAD) + PLAYER_WALL_COLLIDE_ANGLE_ADJUST;
+      Vector2 right_attempt = point_move_with_angle_and_distance(old_pos, angle_right_attempt, 300.f * GetFrameTime());
+
       if (!map.is_hit(left_attempt)) {
+        // TraceLog(LOG_DEBUG, "Left glide | Angle=%.2f | TargetAngle=%.2f", angle, target_angle);
         *pos = left_attempt;
-        return;
-      }
-
-      float angle_right_attempt = move_angle_rad + PLAYER_WALL_COLLIDE_ANGLE_ADJUST;
-      Vector2 right_attempt =
-          point_move_with_angle_and_distance(old_pos, angle_right_attempt, dist * PLAYER_WALL_COLLIDE_DISTANCE_ADJUST);
-      if (!map.is_hit(right_attempt)) {
+      } else if (!map.is_hit(right_attempt)) {
+        // TraceLog(LOG_DEBUG, "Right glide | Angle=%.2f | TargetAngle=%.2f", angle, target_angle);
         *pos = right_attempt;
-        return;
+      } else {
+        // TraceLog(
+        //     LOG_DEBUG,
+        //     "No glide | Angle=%.2f | TargetAngle=%.2f | Old=%.2f:%.2f New=%.2f:%.2f Left=%.2f:%.2f Right=%.2f:%.2f",
+        //     angle, target_angle, XY(old_pos), XY((*pos)), XY(left_attempt), XY(right_attempt));
+        *pos = old_pos;
+        velocity = 0.f;
       }
-
-      *pos = old_pos;
     }
 
     if (!Vector2Equals(*pos, old_pos)) {
@@ -208,12 +241,6 @@ struct Player {
 
   [[nodiscard]] Vector2 screen_relative_center(const Vector2 &world_offset) const {
     return Vector2Add(*pos, world_offset);
-  }
-
-  void move_to_relative_direction(const float rel_rad_angle, float rate) {
-    const float abs_angle = (angle * DEG2RAD) + rel_rad_angle;
-    pos->x += cosf(abs_angle) * PLAYER_SPEED * GetFrameTime() * rate;
-    pos->y += sinf(abs_angle) * PLAYER_SPEED * GetFrameTime() * rate;
   }
 
   void hurt(float hurt_val) {
