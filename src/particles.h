@@ -128,8 +128,11 @@ struct TraceParticle final : Particle {
   }
 
   void draw(Map const &map) const override {
-    DrawRectanglePro(Rectangle{pos.x + map.world_offset.x, pos.y + map.world_offset.y, 40.f, 10.f}, Vector2{20.f, 5.f},
-                     angle_deg, ColorAlpha(DARKBROWN, alpha));
+    DrawRectanglePro(Rectangle{pos.x + map.world_offset.x, pos.y + map.world_offset.y, 10.f, 10.f},
+                     Vector2{20.f, -20.f}, angle_deg, ColorAlpha(DARKBROWN, alpha));
+
+    DrawRectanglePro(Rectangle{pos.x + map.world_offset.x, pos.y + map.world_offset.y, 10.f, 10.f},
+                     Vector2{-10.f, -20.f}, angle_deg, ColorAlpha(DARKBROWN, alpha));
   }
 
   void update() override {

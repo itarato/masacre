@@ -45,8 +45,8 @@ struct Player {
   }
 
   void reset(PathFinder const &path_finder) {
-    angle = 270.f;  // Up.
-    target_angle = 270.f;
+    angle = 0.f;  // Up.
+    target_angle = 0.f;
     velocity = 0.f;
     bullets.clear();
     pos->x = path_finder.start_pos.x * CELL_DISTANCE;

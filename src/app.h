@@ -15,7 +15,7 @@
 #include "player.h"
 #include "raylib.h"
 
-constexpr int ENEMY_SPAWN_COUNT = 16;
+constexpr int ENEMY_SPAWN_COUNT = 0;
 constexpr int MAX_COLLECTIBLE_HEALTH_COUNT = 1;
 constexpr int MAX_COLLECTIBLE_BULLET_COUNT = 5;
 constexpr int ENEMY_JAM_CONTROL_CLOSE = CELL_DISTANCE;
