@@ -1,5 +1,6 @@
 #pragma once
 
+#include <list>
 #include <memory>
 
 #include "asset_manager.h"
@@ -129,5 +130,24 @@ struct Enemy {
     }
 
     angle = abs_angle_of_points(old_pos, pos) * RAD2DEG;
+  }
+};
+
+struct EnemySpawner : Deletable {
+  Vector2 pos{};
+  RepeatedTask spawn_repeater{5.0};
+  float circle_frame_radius{20.f};
+
+  EnemySpawner(Vector2 _pos) : pos(_pos) {
+  }
+
+  void update(std::list<Enemy> &enemies) {
+    if (spawn_repeater.update()) {
+      enemies.emplace_back(pos);
+    }
+  }
+
+  void draw(Map const &map) const {
+    DrawCircleV(Vector2Add(pos, map.world_offset), circle_frame_radius, ORANGE);
   }
 };

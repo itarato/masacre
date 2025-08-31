@@ -87,6 +87,11 @@ struct TimedTask {
   void reset() {
     lifetime_end = GetTime() + lifetime_seconds;
   }
+
+  void reset(double _lifetime_seconds) {
+    lifetime_seconds = _lifetime_seconds;
+    reset();
+  }
 };
 
 struct RepeatedTask {
@@ -118,10 +123,10 @@ struct RepeatedTask {
     interval_seconds = _interval_seconds;
   }
 
-  void update() {
+  bool update() {
     did_tick = false;
 
-    if (is_paused) return;
+    if (is_paused) return did_tick;
 
     if (last_tick + interval_seconds + current_jitter < GetTime()) {
       did_tick = true;
@@ -129,11 +134,33 @@ struct RepeatedTask {
 
       if (additional_jitter > 0.f) update_jitter();
     }
+
+    return did_tick;
   }
 
  private:
   void update_jitter() {
     current_jitter = randf() * additional_jitter;
+  }
+};
+
+struct TimedRepeatedTask {
+  RepeatedTask repeater;
+  TimedTask timer{0.0};
+
+  TimedRepeatedTask(double _interval_seconds) : repeater(_interval_seconds) {
+  }
+
+  void start_timer(double seconds) {
+    timer.reset(seconds);
+  }
+
+  bool update() {
+    if (timer.is_completed()) {
+      return false;
+    } else {
+      return repeater.update();
+    }
   }
 };
 

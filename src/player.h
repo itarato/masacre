@@ -37,11 +37,11 @@ struct Player {
   float health{};
   int kill_count{};
   int mine_count{};
-
   ParticleManager particle_manager{};
   RepeatedTask smoke_particle_scheduler{0.08};
   RepeatedTask wheel_trace_particle_scheduler{0.05};
   RepeatedTask rapid_fire_scheduler{0.05};
+  TimedRepeatedTask hurt_particle_timed_repeater{0.02};
 
   void init() {
     circle_frame_radius = asset_manager.textures[ASSET_PLAYER_TEXTURE].width / 2.f;
@@ -58,17 +58,17 @@ struct Player {
     mine_count = PLAYER_STARTER_MINE_COUNT;
     health = PLAYER_MAX_HEALTH;
     kill_count = 0;
-    _should_be_deleted = false;
     particle_manager.reset();
     mines.clear();
   }
 
   void update(Map const &map) {
-    if (!should_be_deleted()) {
+    if (!is_dead()) {
       update_movement(map);
       update_rotation();
       update_shooting();
       update_mines();
+      update_hurt_particles();
     }
 
     std::erase_if(bullets, [](auto e) { return e.should_be_deleted; });
@@ -100,7 +100,7 @@ struct Player {
     for (auto const &mine : mines) mine.draw(map);
 
     // Draw main player.
-    if (!should_be_deleted()) {
+    if (!is_dead()) {
       draw_texture(asset_manager.textures[ASSET_PLAYER_TEXTURE], screen_relative_center(map.world_offset),
                    target_angle);
     } else {
@@ -265,6 +265,30 @@ struct Player {
     }
   }
 
+  void update_hurt_particles() {
+    if (hurt_particle_timed_repeater.update()) {
+      float angle_rad = (230 + rand() % 80) * DEG2RAD;
+      auto particle = std::make_unique<StraightLineParticle>(*pos, angle_rad, 400.f, 0.5);
+      particle->speed_multiplier = 0.95f;
+      particle->size = 2.f;
+      switch (rand() % 5) {
+        case 0:
+          particle->color = YELLOW;
+          break;
+        case 1:
+          particle->color = ORANGE;
+          break;
+        case 2:
+          particle->color = DARKGRAY;
+          break;
+        default:
+          particle->color = RED;
+          break;
+      }
+      particle_manager.particles.push_back(std::move(particle));
+    }
+  }
+
   [[nodiscard]] Vector2 screen_relative_center(const Vector2 &world_offset) const {
     return Vector2Add(*pos, world_offset);
   }
@@ -273,12 +297,14 @@ struct Player {
     health -= hurt_val;
 
     if (health <= 0) {
-      _should_be_deleted = true;
+      health = 0;
+    } else {
+      hurt_particle_timed_repeater.start_timer(1.0);
     }
   }
 
-  [[nodiscard]] bool should_be_deleted() const {
-    return _should_be_deleted;
+  bool is_dead() const {
+    return health <= 0.f;
   }
 
   void consume(Collectible const &collectible) {
@@ -298,7 +324,4 @@ struct Player {
         exit(EXIT_FAILURE);
     }
   }
-
- private:
-  bool _should_be_deleted{false};
 };

@@ -140,49 +140,6 @@ struct TraceParticle final : Particle {
   }
 };
 
-struct BurnParticleGroup final : UIElementAndDeletable {
-  std::shared_ptr<Vector2> player_pos;
-  TimedTask lifetime{1.0};
-  RepeatedTask particle_repeater{0.02};
-  ParticleManager particle_manager{};
-
-  explicit BurnParticleGroup(std::shared_ptr<Vector2> _player_pos) : player_pos(std::move(_player_pos)) {
-  }
-
-  void update() override {
-    if (lifetime.is_completed()) should_be_deleted = true;
-
-    particle_manager.update();
-    particle_repeater.update();
-
-    if (particle_repeater.did_tick) {
-      float angle_rad = (230 + rand() % 80) * DEG2RAD;
-      auto particle = std::make_unique<StraightLineParticle>(*player_pos, angle_rad, 400.f, 0.5);
-      particle->speed_multiplier = 0.95f;
-      particle->size = 2.f;
-      switch (rand() % 5) {
-        case 0:
-          particle->color = YELLOW;
-          break;
-        case 1:
-          particle->color = ORANGE;
-          break;
-        case 2:
-          particle->color = DARKGRAY;
-          break;
-        default:
-          particle->color = RED;
-          break;
-      }
-      particle_manager.particles.push_back(std::move(particle));
-    }
-  }
-
-  void draw(Map const &map) const override {
-    particle_manager.draw(map);
-  }
-};
-
 void make_explosion(ParticleManager &particle_manager, Vector2 const &pos, const float speed, const int count,
                     const Color &color) {
   for (int i = 0; i < count; i++) {

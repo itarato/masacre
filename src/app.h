@@ -15,7 +15,7 @@
 #include "player.h"
 #include "raylib.h"
 
-constexpr int ENEMY_SPAWN_COUNT = 20;
+constexpr int ENEMY_SPAWNER_COUNT = 3;
 constexpr int MAX_COLLECTIBLE_HEALTH_COUNT = 1;
 constexpr int MAX_COLLECTIBLE_BULLET_COUNT = 5;
 constexpr int MAX_COLLECTIBLE_MINE_COUNT = 3;
@@ -30,6 +30,7 @@ struct App {
   PerfChart perf_chart{};
   PathFinder path_finder{};
   Minimap minimap{};
+  std::list<EnemySpawner> enemy_spawners{};
 
   void init() {
     srand(time(nullptr));
@@ -54,6 +55,9 @@ struct App {
     enemies.clear();
     collectibles.clear();
     game_scope.reset();
+    enemy_spawners.clear();
+
+    for (int i = 0; i < ENEMY_SPAWNER_COUNT; i++) enemy_spawners.emplace_back(discoverable_random_spot());
   }
 
   void run() {
@@ -76,6 +80,7 @@ struct App {
 
     player.update(map);
 
+    for (auto& enemy_spawner : enemy_spawners) enemy_spawner.update(enemies);
     for (auto& enemy : enemies) enemy.update(*player.pos, map, path_finder);
 
     map.update(*player.pos);
@@ -89,10 +94,6 @@ struct App {
     // Delete disposables.
     std::erase_if(enemies, [](const auto& e) { return e.should_be_deleted(); });
     std::erase_if(collectibles, [](const auto& e) { return e.should_be_deleted; });
-
-    if (enemies.empty()) {
-      for (int i = 0; i < ENEMY_SPAWN_COUNT; i++) enemies.emplace_back(discoverable_random_spot());
-    }
 
     if (collectible_count_of_type(CollectibleType::Health) < MAX_COLLECTIBLE_HEALTH_COUNT) {
       collectibles.emplace_back(discoverable_random_spot(), CollectibleType::Health);
@@ -109,6 +110,7 @@ struct App {
 
   void draw() const {
     map.draw();
+    for (auto const& enemy_spawner : enemy_spawners) enemy_spawner.draw(map);
     for (auto const& enemy : enemies) enemy.draw(map, *player.pos);
     for (auto const& collectible : collectibles) collectible.draw(map);
     game_scope.draw(map);
