@@ -137,7 +137,7 @@ struct Enemy {
 struct EnemySpawner {
   Vector2 pos{};
   RepeatedTask spawn_repeater{5.0};
-  float circle_frame_radius{20.f};
+  float circle_frame_radius{30.f};
   float health{ENEMY_SPAWNER_MAX_HEALTH};
 
   EnemySpawner(Vector2 _pos) : pos(_pos) {
@@ -152,7 +152,7 @@ struct EnemySpawner {
   }
 
   void draw(Map const &map) const {
-    DrawCircleV(Vector2Add(pos, map.world_offset), circle_frame_radius, ORANGE);
+    draw_texture(asset_manager.textures[ASSET_ENEMY_SPAWNER_TEXTURE], Vector2Add(pos, map.world_offset), 0.f);
     DrawRectangle(pos.x - circle_frame_radius + map.world_offset.x - 2.f,
                   pos.y - circle_frame_radius - 8 + map.world_offset.y - 2.f, (circle_frame_radius * 2) + 4.f,
                   8.f + 4.f, DARKGRAY);

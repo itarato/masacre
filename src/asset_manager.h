@@ -19,6 +19,7 @@ constexpr int ASSET_PLAYER_BROKEN_TEXTURE = 11;
 constexpr int ASSET_ENEMY_BROKEN_TEXTURE = 12;
 constexpr int ASSET_COLLECTIBLE_MINE_TEXTURE = 13;
 constexpr int ASSET_ICON_MINE_TEXTURE = 14;
+constexpr int ASSET_ENEMY_SPAWNER_TEXTURE = 15;
 
 constexpr int ASSET_MAP_IMAGE = 0;
 
@@ -53,6 +54,7 @@ struct AssetManager {
     textures[ASSET_ENEMY_BROKEN_TEXTURE] = LoadTexture("./assets/images/enemy_broken.png");
     textures[ASSET_COLLECTIBLE_MINE_TEXTURE] = LoadTexture("./assets/images/collectible_mine.png");
     textures[ASSET_ICON_MINE_TEXTURE] = LoadTexture("./assets/images/icon_mine.png");
+    textures[ASSET_ENEMY_SPAWNER_TEXTURE] = LoadTexture("./assets/images/enemy_spawner.png");
 
     images[ASSET_MAP_IMAGE] = LoadImage("./assets/images/map_image.png");
 
