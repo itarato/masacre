@@ -6,14 +6,14 @@
 #include <string>
 #include <utility>
 
+#include "common.h"
 #include "map.h"
 #include "raylib.h"
 
 constexpr float PARTICLE_SMOKE_SPEED = 80.f;
 
-struct Particle {
+struct Particle : Deletable {
   Vector2 pos{};
-  bool should_be_deleted{false};
 
   Particle() = default;
   explicit Particle(Vector2 _pos) : pos(_pos) {

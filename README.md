@@ -15,4 +15,5 @@ Missing:
 
 Idea:
 
-- destroying map (like in worms) 
+- destroying map (like in worms)
+- enemy spawning from factories on a time interval

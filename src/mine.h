@@ -18,4 +18,8 @@ struct Mine {
   void kill() {
     should_be_deleted = true;
   }
+
+  static float blast_radius() {
+    return MINE_RADIUS * 10.f;
+  }
 };

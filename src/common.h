@@ -23,6 +23,10 @@ inline float randf() {
   return static_cast<float>(rand() % 1001) / 1000.f;
 }
 
+struct Deletable {
+  bool should_be_deleted{false};
+};
+
 struct IntVector2 {
   int x{};
   int y{};

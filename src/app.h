@@ -15,7 +15,7 @@
 #include "player.h"
 #include "raylib.h"
 
-constexpr int ENEMY_SPAWN_COUNT = 12;
+constexpr int ENEMY_SPAWN_COUNT = 0;
 constexpr int MAX_COLLECTIBLE_HEALTH_COUNT = 1;
 constexpr int MAX_COLLECTIBLE_BULLET_COUNT = 5;
 constexpr int MAX_COLLECTIBLE_MINE_COUNT = 3;
@@ -148,8 +148,8 @@ struct App {
 
       for (auto& bullet : player.bullets) {
         if (CheckCollisionPointCircle(bullet.pos, enemy.pos, enemy.circle_frame_radius)) {
-          enemy.kill();
           bullet.kill();
+          enemy.kill();
           player.kill_count++;
         }
       }
@@ -157,7 +157,12 @@ struct App {
       for (auto& mine : player.mines) {
         if (CheckCollisionCircles(mine.pos, mine.circle_frame_radius, enemy.pos, enemy.circle_frame_radius)) {
           mine.kill();
-          enemy.kill();
+
+          for (auto& _enemy : enemies) {
+            if (CheckCollisionCircles(mine.pos, mine.blast_radius(), _enemy.pos, _enemy.circle_frame_radius)) {
+              _enemy.kill();
+            }
+          }
         }
       }
 
