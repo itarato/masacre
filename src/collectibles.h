@@ -12,6 +12,7 @@ constexpr float COLLECTIBLE_RADIUS = 20.f;
 enum class CollectibleType {
   Bullet,
   Health,
+  Mine,
 };
 
 struct Collectible {
@@ -32,6 +33,9 @@ struct Collectible {
         break;
       case CollectibleType::Health:
         texture_id = ASSET_COLLECTIBLE_HEALTH_TEXTURE;
+        break;
+      case CollectibleType::Mine:
+        texture_id = ASSET_COLLECTIBLE_MINE_TEXTURE;
         break;
       default:
         TraceLog(LOG_ERROR, "Unhandled collectible type");

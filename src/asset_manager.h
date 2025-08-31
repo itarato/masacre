@@ -17,6 +17,8 @@ constexpr int ASSET_BULLET_TEXTURE = 9;
 constexpr int ASSET_ICON_KILLS_TEXTURE = 10;
 constexpr int ASSET_PLAYER_BROKEN_TEXTURE = 11;
 constexpr int ASSET_ENEMY_BROKEN_TEXTURE = 12;
+constexpr int ASSET_COLLECTIBLE_MINE_TEXTURE = 13;
+constexpr int ASSET_ICON_MINE_TEXTURE = 14;
 
 constexpr int ASSET_MAP_IMAGE = 0;
 
@@ -40,8 +42,8 @@ struct AssetManager {
     textures[ASSET_MAP_TEXTURE] = LoadTexture("./assets/images/map_texture.png");
     textures[ASSET_ENEMY_WHEEL_TEXTURE] = LoadTexture("./assets/images/enemy_wheel.png");
     textures[ASSET_ENEMY_BARREL_TEXTURE] = LoadTexture("./assets/images/enemy_barrel.png");
-    textures[ASSET_COLLECTIBLE_HEALTH_TEXTURE] = LoadTexture("./assets/images/health_00.png");
-    textures[ASSET_COLLECTIBLE_BULLET_TEXTURE] = LoadTexture("./assets/images/bullet_00.png");
+    textures[ASSET_COLLECTIBLE_HEALTH_TEXTURE] = LoadTexture("./assets/images/collectible_health.png");
+    textures[ASSET_COLLECTIBLE_BULLET_TEXTURE] = LoadTexture("./assets/images/collectible_bullet.png");
     textures[ASSET_ICON_HEALTH_TEXTURE] = LoadTexture("./assets/images/icon_health.png");
     textures[ASSET_ICON_BULLET_TEXTURE] = LoadTexture("./assets/images/icon_bullet.png");
     textures[ASSET_ICON_FPS_TEXTURE] = LoadTexture("./assets/images/icon_fps.png");
@@ -49,6 +51,8 @@ struct AssetManager {
     textures[ASSET_ICON_KILLS_TEXTURE] = LoadTexture("./assets/images/icon_kills.png");
     textures[ASSET_PLAYER_BROKEN_TEXTURE] = LoadTexture("./assets/images/player_broken.png");
     textures[ASSET_ENEMY_BROKEN_TEXTURE] = LoadTexture("./assets/images/enemy_broken.png");
+    textures[ASSET_COLLECTIBLE_MINE_TEXTURE] = LoadTexture("./assets/images/collectible_mine.png");
+    textures[ASSET_ICON_MINE_TEXTURE] = LoadTexture("./assets/images/icon_mine.png");
 
     images[ASSET_MAP_IMAGE] = LoadImage("./assets/images/map_image.png");
 

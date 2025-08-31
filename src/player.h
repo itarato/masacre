@@ -3,13 +3,13 @@
 #include <algorithm>
 #include <cmath>
 #include <memory>
-#include <vector>
 
 #include "asset_manager.h"
 #include "bullet.h"
 #include "collectibles.h"
 #include "common.h"
 #include "map.h"
+#include "mine.h"
 #include "particles.h"
 #include "path_finder.h"
 #include "raylib.h"
@@ -30,10 +30,12 @@ struct Player {
   float angle{};         // Degree.
   float target_angle{};  // Degree.
   float velocity{};
-  std::vector<Bullet> bullets{};
+  std::list<Bullet> bullets{};
+  std::list<Mine> mines{};
   int bullet_count{};
   float health{};
   int kill_count{};
+  int mine_count{3};
 
   ParticleManager particle_manager{};
   RepeatedTask smoke_particle_scheduler{0.08};
@@ -56,6 +58,7 @@ struct Player {
     kill_count = 0;
     _should_be_deleted = false;
     particle_manager.reset();
+    mines.clear();
   }
 
   void update(Map const &map) {
@@ -63,9 +66,11 @@ struct Player {
       update_movement(map);
       update_rotation();
       update_shooting();
+      update_mines();
     }
 
     std::erase_if(bullets, [](auto e) { return e.should_be_deleted; });
+    std::erase_if(mines, [](auto e) { return e.should_be_deleted; });
     for (auto &bullet : bullets) bullet.update(map);
 
     particle_manager.update();
@@ -88,6 +93,9 @@ struct Player {
   void draw(Map const &map) const {
     // Draw all bullets.
     for (auto const &bullet : bullets) bullet.draw(map);
+
+    // Draw mines.
+    for (auto const &mine : mines) mine.draw(map);
 
     // Draw main player.
     if (!should_be_deleted()) {
@@ -118,6 +126,10 @@ struct Player {
     DrawTexture(asset_manager.textures[ASSET_ICON_BULLET_TEXTURE], GetScreenWidth() - 140, GetScreenHeight() - 52,
                 WHITE);
     DrawText(TextFormat("%d", bullet_count), GetScreenWidth() - 116, GetScreenHeight() - 52, 20, WHITE);
+
+    // Mine bar.
+    DrawTexture(asset_manager.textures[ASSET_ICON_MINE_TEXTURE], GetScreenWidth() - 74, GetScreenHeight() - 52, WHITE);
+    DrawText(TextFormat("%d", mine_count), GetScreenWidth() - 50, GetScreenHeight() - 52, 20, WHITE);
 
     // FPS bar.
     DrawTexture(asset_manager.textures[ASSET_ICON_FPS_TEXTURE], GetScreenWidth() - 140, GetScreenHeight() - 28, WHITE);
@@ -152,6 +164,15 @@ struct Player {
     }
   }
 
+  void update_mines() {
+    if (mine_count <= 0) return;
+
+    if (IsKeyPressed(KEY_LEFT_SHIFT)) {
+      mines.emplace_back(*pos);
+      mine_count--;
+    }
+  }
+
   void unconditional_shoot() {
     bullet_count--;
 
@@ -176,7 +197,7 @@ struct Player {
       had_movement = true;
     }
 
-    // Disabling gamepad - the keyboard is pretending to be one and the axis is 0.0 instead of -1.0 as default state
+    // Disabling gamepad - the keyboard is pretending to be one, and the axis is 0.0 instead of -1.0 as default state
     // which makes a movement triggered which prevents slowing down.
     // if (IsGamepadAvailable(0)) {
     // TraceLog(LOG_INFO, "GP0=%.2f %s", GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_TRIGGER), GetGamepadName(0));
@@ -266,6 +287,9 @@ struct Player {
       case CollectibleType::Health:
         health += PLAYER_HEALTH_COLLECT;
         if (health > PLAYER_MAX_HEALTH) health = PLAYER_MAX_HEALTH;
+        break;
+      case CollectibleType::Mine:
+        mine_count++;
         break;
       default:
         TraceLog(LOG_ERROR, "Unhandled collectible type");
