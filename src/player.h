@@ -21,6 +21,7 @@ constexpr float PLAYER_WALL_COLLIDE_ANGLE_ADJUST = PI / 3.f;
 constexpr float PLAYER_WALL_COLLIDE_DISTANCE_ADJUST = 1.0f;
 constexpr int PLAYER_MAX_HEALTH = 100;
 constexpr int PLAYER_STARTER_BULLET_COUNT = 100;
+constexpr int PLAYER_STARTER_MINE_COUNT = 3;
 constexpr int PLAYER_HEALTH_COLLECT = 25;
 constexpr int PLAYER_BULLET_COLLECT = 50;
 
@@ -35,7 +36,7 @@ struct Player {
   int bullet_count{};
   float health{};
   int kill_count{};
-  int mine_count{3};
+  int mine_count{};
 
   ParticleManager particle_manager{};
   RepeatedTask smoke_particle_scheduler{0.08};
@@ -54,6 +55,7 @@ struct Player {
     pos->x = path_finder.start_pos.x * CELL_DISTANCE;
     pos->y = path_finder.start_pos.y * CELL_DISTANCE;
     bullet_count = PLAYER_STARTER_BULLET_COUNT;
+    mine_count = PLAYER_STARTER_MINE_COUNT;
     health = PLAYER_MAX_HEALTH;
     kill_count = 0;
     _should_be_deleted = false;

@@ -15,7 +15,7 @@
 #include "player.h"
 #include "raylib.h"
 
-constexpr int ENEMY_SPAWN_COUNT = 0;
+constexpr int ENEMY_SPAWN_COUNT = 20;
 constexpr int MAX_COLLECTIBLE_HEALTH_COUNT = 1;
 constexpr int MAX_COLLECTIBLE_BULLET_COUNT = 5;
 constexpr int MAX_COLLECTIBLE_MINE_COUNT = 3;
@@ -157,6 +157,7 @@ struct App {
       for (auto& mine : player.mines) {
         if (CheckCollisionCircles(mine.pos, mine.circle_frame_radius, enemy.pos, enemy.circle_frame_radius)) {
           mine.kill();
+          make_explosion(game_scope.particle_manager, mine.pos, 300.f, 64, ColorAlpha(GRAY, 0.5f));
 
           for (auto& _enemy : enemies) {
             if (CheckCollisionCircles(mine.pos, mine.blast_radius(), _enemy.pos, _enemy.circle_frame_radius)) {

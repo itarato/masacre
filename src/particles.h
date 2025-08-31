@@ -7,25 +7,22 @@
 #include <utility>
 
 #include "common.h"
+#include "enemy.h"
 #include "map.h"
 #include "raylib.h"
 
 constexpr float PARTICLE_SMOKE_SPEED = 80.f;
 
-struct Particle : Deletable {
+struct Particle : UIElementAndDeletable {
   Vector2 pos{};
 
   Particle() = default;
   explicit Particle(Vector2 _pos) : pos(_pos) {
   }
-  virtual ~Particle() = default;
-
-  virtual void draw(Map const &map) const = 0;
-  virtual void update() = 0;
 };
 
 struct ParticleManager {
-  std::list<std::unique_ptr<Particle>> particles{};
+  std::list<std::unique_ptr<UIElementAndDeletable>> particles{};
 
   void update() {
     for (auto &particle : particles) particle->update();
@@ -69,13 +66,15 @@ struct ExplosionParticle final : Particle {
   Vector2 v{};
   TimedTask lifetime;
   float size_jitter;
+  Color color;
 
-  ExplosionParticle(Vector2 _pos, Vector2 _v) : Particle(_pos), v(_v), lifetime(1.5) {
+  ExplosionParticle(Vector2 _pos, Vector2 _v, Color _color = GOLD)
+      : Particle(_pos), v(_v), lifetime(1.5), color(_color) {
     size_jitter = static_cast<float>(rand() % 100) / 200.f + 0.75f;
   }
 
   void draw(Map const &map) const override {
-    DrawCircleV(Vector2Add(pos, map.world_offset), 6.f * size_jitter, GOLD);
+    DrawCircleV(Vector2Add(pos, map.world_offset), 6.f * size_jitter, color);
   };
 
   void update() override {
@@ -141,13 +140,13 @@ struct TraceParticle final : Particle {
   }
 };
 
-struct BurnParticleGroup final : Particle {
+struct BurnParticleGroup final : UIElementAndDeletable {
   std::shared_ptr<Vector2> player_pos;
   TimedTask lifetime{1.0};
   RepeatedTask particle_repeater{0.02};
   ParticleManager particle_manager{};
 
-  explicit BurnParticleGroup(std::shared_ptr<Vector2> _player_pos) : Particle(), player_pos(std::move(_player_pos)) {
+  explicit BurnParticleGroup(std::shared_ptr<Vector2> _player_pos) : player_pos(std::move(_player_pos)) {
   }
 
   void update() override {
@@ -183,3 +182,14 @@ struct BurnParticleGroup final : Particle {
     particle_manager.draw(map);
   }
 };
+
+void make_explosion(ParticleManager &particle_manager, Vector2 const &pos, const float speed, const int count,
+                    const Color &color) {
+  for (int i = 0; i < count; i++) {
+    float particle_angle = rand() % 360 * DEG2RAD;
+    float particle_speed_jitter = static_cast<float>(rand() % 100) / 200.f + 0.75f;
+    Vector2 v{cosf(particle_angle) * speed * GetFrameTime() * particle_speed_jitter,
+              sinf(particle_angle) * speed * GetFrameTime() * particle_speed_jitter};
+    particle_manager.particles.push_back(std::make_unique<ExplosionParticle>(pos, v, color));
+  }
+}

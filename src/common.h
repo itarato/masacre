@@ -3,6 +3,7 @@
 #include <cmath>
 #include <vector>
 
+#include "map.h"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -26,6 +27,16 @@ inline float randf() {
 struct Deletable {
   bool should_be_deleted{false};
 };
+
+struct UIElement {
+  UIElement() = default;
+  virtual ~UIElement() = default;
+
+  virtual void draw(Map const &map) const = 0;
+  virtual void update() = 0;
+};
+
+struct UIElementAndDeletable : UIElement, Deletable {};
 
 struct IntVector2 {
   int x{};

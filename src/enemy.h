@@ -83,13 +83,7 @@ struct Enemy {
     is_dead = true;
     dying_lifetime.reset();
 
-    for (int i = 0; i < 32; i++) {
-      float particle_angle = rand() % 360 * DEG2RAD;
-      float particle_speed_jitter = static_cast<float>(rand() % 100) / 200.f + 0.75f;
-      Vector2 v{cosf(particle_angle) * ENEMY_EXPLOSION_SPEED * GetFrameTime() * particle_speed_jitter,
-                sinf(particle_angle) * ENEMY_EXPLOSION_SPEED * GetFrameTime() * particle_speed_jitter};
-      particle_manager.particles.push_back(std::make_unique<ExplosionParticle>(pos, v));
-    }
+    make_explosion(particle_manager, pos, ENEMY_EXPLOSION_SPEED, 32, GOLD);
   }
 
   [[nodiscard]] bool should_be_deleted() const {

@@ -1,17 +1,21 @@
 #pragma once
 
+#include <algorithm>
 #include <list>
 
 #include "bullet.h"
 #include "map.h"
+#include "particles.h"
 #include "player.h"
 #include "raylib.h"
 
 struct GameScope {
   std::list<Bullet> enemy_bullets{};
+  ParticleManager particle_manager{};
 
   void reset() {
     enemy_bullets.clear();
+    particle_manager.reset();
   }
 
   void update(Map const &map, Player &player) {
@@ -25,10 +29,13 @@ struct GameScope {
         player.particle_manager.particles.emplace_back(std::make_unique<BurnParticleGroup>(player.pos));
       }
     }
+
+    particle_manager.update();
   }
 
   void draw(Map const &map) const {
     for (auto const &bullet : enemy_bullets) bullet.draw(map);
+    particle_manager.draw(map);
   }
 };
 

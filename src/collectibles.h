@@ -40,7 +40,6 @@ struct Collectible {
       default:
         TraceLog(LOG_ERROR, "Unhandled collectible type");
         exit(EXIT_FAILURE);
-        break;
     }
 
     draw_texture(asset_manager.textures[texture_id], Vector2Add(pos, map.world_offset), 0.f);
