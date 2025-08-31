@@ -15,6 +15,7 @@ constexpr float ENEMY_SPEED = 200.f;
 constexpr float ENEMY_TARGET_REACH_THRESHOLD = 1.f;
 constexpr float ENEMY_EXPLOSION_SPEED = 200.f;
 constexpr float ENEMY_PLAYER_MIN_CHASE_DISTANCE = 100.f;
+constexpr float ENEMY_SPAWNER_MAX_HEALTH = 200.f;
 
 struct Enemy {
   u_int64_t object_id;
@@ -133,21 +134,40 @@ struct Enemy {
   }
 };
 
-struct EnemySpawner : Deletable {
+struct EnemySpawner {
   Vector2 pos{};
   RepeatedTask spawn_repeater{5.0};
   float circle_frame_radius{20.f};
+  float health{ENEMY_SPAWNER_MAX_HEALTH};
 
   EnemySpawner(Vector2 _pos) : pos(_pos) {
   }
 
   void update(std::list<Enemy> &enemies) {
-    if (spawn_repeater.update()) {
-      enemies.emplace_back(pos);
+    if (!is_dead()) {
+      if (spawn_repeater.update()) {
+        enemies.emplace_back(pos);
+      }
     }
   }
 
   void draw(Map const &map) const {
     DrawCircleV(Vector2Add(pos, map.world_offset), circle_frame_radius, ORANGE);
+    DrawRectangle(pos.x - circle_frame_radius + map.world_offset.x - 2.f,
+                  pos.y - circle_frame_radius - 8 + map.world_offset.y - 2.f, (circle_frame_radius * 2) + 4.f,
+                  8.f + 4.f, DARKGRAY);
+    DrawRectangle(pos.x - circle_frame_radius + map.world_offset.x,
+                  pos.y - circle_frame_radius - 8 + map.world_offset.y,
+                  (circle_frame_radius * 2) * health / ENEMY_SPAWNER_MAX_HEALTH, 8.f, RED);
+  }
+
+  void hurt(Bullet const &bullet) {
+    // TODO: particles.
+    health -= bullet.attack_damage();
+    if (health <= 0.f) health = 0.f;
+  }
+
+  bool is_dead() const {
+    return health <= 0.f;
   }
 };

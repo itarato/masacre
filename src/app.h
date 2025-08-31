@@ -88,6 +88,7 @@ struct App {
     game_scope.update(map, player);
 
     update_enemy_collision_checks();
+    update_enemy_spawner_collision_checks();
     update_collectible_collisions();
     update_enemy_jam_control();
 
@@ -171,6 +172,17 @@ struct App {
 
       if (CheckCollisionCircles(*player.pos, player.circle_frame_radius, enemy.pos, enemy.circle_frame_radius)) {
         player.hurt(enemy.attack_damage());
+      }
+    }
+  }
+
+  void update_enemy_spawner_collision_checks() {
+    for (auto& enemy_spawner : enemy_spawners) {
+      for (auto& bullet : player.bullets) {
+        if (CheckCollisionPointCircle(bullet.pos, enemy_spawner.pos, enemy_spawner.circle_frame_radius)) {
+          enemy_spawner.hurt(bullet);
+          bullet.kill();
+        }
       }
     }
   }
