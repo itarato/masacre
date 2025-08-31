@@ -14,6 +14,8 @@ constexpr int WINDOW_H = 800;
 constexpr float BULLET_SPEED = 800.f;
 constexpr int CELL_DISTANCE = 50;
 constexpr int REFERENCE_FPS = 144;
+constexpr float BULLET_SINGLE_ATTACK_DAMAGE = 30.f;
+constexpr float BULLET_BURST_ATTACK_DAMAGE = 10.f;
 
 static u_int64_t global_object_id{0};
 
@@ -38,6 +40,10 @@ struct UIElement {
 
 struct UIElementAndDeletable : UIElement, Deletable {};
 
+struct AttackDamage {
+  float attack_damage{0.f};
+};
+
 struct IntVector2 {
   int x{};
   int y{};
@@ -53,6 +59,10 @@ constexpr float int_vector2_dist(IntVector2 lhs, IntVector2 rhs) {
 
 inline Vector2 int_vector2_to_vector2(IntVector2 p) {
   return Vector2{static_cast<float>(p.x * CELL_DISTANCE), static_cast<float>(p.y * CELL_DISTANCE)};
+}
+
+Vector2 randomize_pos(Vector2 const &p, float jitter) {
+  return Vector2{p.x + randf() * jitter - (jitter / 2.f), p.y + randf() * jitter - (jitter / 2.f)};
 }
 
 struct PFCell {

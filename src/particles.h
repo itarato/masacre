@@ -41,11 +41,15 @@ struct ParticleManager {
 struct SmokeParticle final : Particle {
   TimedTask lifetime;
   float radius{2.0f};
-  float jitter;
+  float phase_jitter;
   float alpha{0.2f};
 
   explicit SmokeParticle(Vector2 const _pos) : Particle(_pos), lifetime(1.6) {
-    jitter = static_cast<float>(rand() % 628) / 100.f;
+    phase_jitter = static_cast<float>(rand() % 628) / 100.f;
+  }
+  explicit SmokeParticle(Vector2 const _pos, const float pos_jitter)
+      : Particle(randomize_pos(_pos, pos_jitter)), lifetime(1.6) {
+    phase_jitter = static_cast<float>(rand() % 628) / 100.f;
   }
   ~SmokeParticle() override = default;
 
@@ -54,7 +58,7 @@ struct SmokeParticle final : Particle {
   };
   void update() override {
     pos.y -= PARTICLE_SMOKE_SPEED * GetFrameTime();
-    pos.x += sinf(GetTime() * 10.f + jitter) * 0.3f;
+    pos.x += sinf(GetTime() * 10.f + phase_jitter) * 0.3f;
     radius += GetFrameTime() * 10.f;
     alpha -= GetFrameTime() * 0.1f;
 

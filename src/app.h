@@ -152,7 +152,7 @@ struct App {
       for (auto& bullet : player.bullets) {
         if (CheckCollisionPointCircle(bullet.pos, enemy.pos, enemy.circle_frame_radius)) {
           bullet.kill();
-          enemy.kill();
+          enemy.hurt(bullet);
           player.kill_count++;
         }
       }
@@ -164,7 +164,7 @@ struct App {
 
           for (auto& _enemy : enemies) {
             if (CheckCollisionCircles(mine.pos, mine.blast_radius(), _enemy.pos, _enemy.circle_frame_radius)) {
-              _enemy.kill();
+              _enemy.hurt(mine);
             }
           }
         }

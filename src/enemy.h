@@ -30,6 +30,7 @@ struct Enemy {
   float barrel_angle_rad{};
   float collision_avoidance_slowdown{1.f};
   RepeatedTask smoke_particle_scheduler{0.1};
+  float health{30.f};
 
   explicit Enemy(Vector2 _pos) : pos(_pos), move_target(_pos) {
     // The frame is derived from the image which is designed for turning.
@@ -54,7 +55,7 @@ struct Enemy {
         float aim_jitter_rad = ((rand() % 31) - 15) * DEG2RAD;
         Vector2 bullet_v{cosf(barrel_angle_rad + aim_jitter_rad) * BULLET_SPEED * GetFrameTime(),
                          sinf(barrel_angle_rad + aim_jitter_rad) * BULLET_SPEED * GetFrameTime()};
-        game_scope.enemy_bullets.emplace_back(pos, bullet_v);
+        game_scope.enemy_bullets.emplace_back(pos, bullet_v, BULLET_SINGLE_ATTACK_DAMAGE);
 
         PlaySound(asset_manager.sounds[ASSET_SOUND_ENEMY_SHOOT]);
       }
@@ -79,13 +80,17 @@ struct Enemy {
     particle_manager.draw(map);
   }
 
-  void kill() {
+  void hurt(AttackDamage const &thing) {
     if (is_dead) return;
 
-    is_dead = true;
-    dying_lifetime.reset();
+    health -= thing.attack_damage;
 
-    make_explosion(particle_manager, pos, ENEMY_EXPLOSION_SPEED, 32, GOLD);
+    if (health <= 0.f) {
+      health = 0.f;
+      is_dead = true;
+      dying_lifetime.reset();
+      make_explosion(particle_manager, pos, ENEMY_EXPLOSION_SPEED, 32, GOLD);
+    }
   }
 
   [[nodiscard]] bool should_be_deleted() const {
@@ -139,15 +144,21 @@ struct EnemySpawner {
   RepeatedTask spawn_repeater{5.0};
   float circle_frame_radius{30.f};
   float health{ENEMY_SPAWNER_MAX_HEALTH};
+  RepeatedTask smoke_repeater{1.f};
+  ParticleManager particle_manager{};
 
   EnemySpawner(Vector2 _pos) : pos(_pos) {
+    smoke_repeater.pause();
   }
 
   void update(std::list<Enemy> &enemies) {
     if (!is_dead()) {
-      if (spawn_repeater.update()) {
-        enemies.emplace_back(pos);
-      }
+      if (spawn_repeater.update()) enemies.emplace_back(pos);
+    }
+
+    particle_manager.update();
+    if (smoke_repeater.update()) {
+      particle_manager.particles.push_back(std::make_unique<SmokeParticle>(pos, circle_frame_radius));
     }
   }
 
@@ -159,12 +170,20 @@ struct EnemySpawner {
     DrawRectangle(pos.x - circle_frame_radius + map.world_offset.x,
                   pos.y - circle_frame_radius - 8 + map.world_offset.y,
                   (circle_frame_radius * 2) * health / ENEMY_SPAWNER_MAX_HEALTH, 8.f, RED);
+
+    particle_manager.draw(map);
   }
 
   void hurt(Bullet const &bullet) {
-    // TODO: particles.
-    health -= bullet.attack_damage();
-    if (health <= 0.f) health = 0.f;
+    health -= bullet.attack_damage;
+    if (health <= 0.f) {
+      health = 0.f;
+      smoke_repeater.pause();
+      make_explosion(particle_manager, pos, ENEMY_EXPLOSION_SPEED, 32, GOLD);
+    } else {
+      smoke_repeater.resume();
+      smoke_repeater.set_interval((health / ENEMY_SPAWNER_MAX_HEALTH) * 0.3f + 0.01f);
+    }
   }
 
   bool is_dead() const {

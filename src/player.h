@@ -155,13 +155,13 @@ struct Player {
     if (bullet_count <= 0) return;
 
     if (IsKeyPressed(KEY_LEFT_CONTROL) || IsGamepadButtonPressed(0, 7)) {
-      unconditional_shoot();
+      unconditional_shoot(BULLET_SINGLE_ATTACK_DAMAGE);
     }
 
     if (IsKeyDown(KEY_LEFT_ALT) || IsGamepadButtonDown(0, 8)) {
       rapid_fire_scheduler.update();
       if (rapid_fire_scheduler.did_tick) {
-        unconditional_shoot();
+        unconditional_shoot(BULLET_BURST_ATTACK_DAMAGE);
       }
     }
   }
@@ -175,13 +175,13 @@ struct Player {
     }
   }
 
-  void unconditional_shoot() {
+  void unconditional_shoot(float attack_damage) {
     bullet_count--;
 
     float bullet_angle_rad = target_angle * DEG2RAD;
     Vector2 bullet_v{cosf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime(),
                      sinf(bullet_angle_rad) * BULLET_SPEED * GetFrameTime()};
-    bullets.emplace_back(*pos, bullet_v);
+    bullets.emplace_back(*pos, bullet_v, attack_damage);
 
     PlaySound(asset_manager.sounds[ASSET_SOUND_PLAYER_SHOOT]);
   }

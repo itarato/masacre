@@ -5,13 +5,13 @@
 #include "raylib.h"
 #include "raymath.h"
 
-struct Bullet {
+struct Bullet : AttackDamage {
   Vector2 pos{};
   Vector2 v{};
   bool should_be_deleted{false};
   float angle_deg{};
 
-  Bullet(Vector2 _pos, Vector2 _v) : pos(_pos), v(_v) {
+  Bullet(Vector2 _pos, Vector2 _v, float _attack_damage) : AttackDamage(_attack_damage), pos(_pos), v(_v) {
     angle_deg = abs_angle_of_points(Vector2(), v) * RAD2DEG;
   }
 
@@ -40,9 +40,5 @@ struct Bullet {
 
   void kill() {
     should_be_deleted = true;
-  }
-
-  static constexpr float attack_damage() {
-    return 10.0f;
   }
 };
