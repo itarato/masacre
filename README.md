@@ -8,8 +8,6 @@ Silly top-view 2D shooting game.
 
 Bugs:
 
-- global scope is getting fishy - try to replace it with something injectable
-
 Todo:
 
 - new enemy spawned should be at a minimum distance from the player

@@ -4,10 +4,12 @@
 #include <memory>
 
 #include "asset_manager.h"
+#include "bullet.h"
 #include "common.h"
 #include "map.h"
 #include "particles.h"
 #include "path_finder.h"
+#include "player.h"
 #include "raylib.h"
 #include "zapper.h"
 
