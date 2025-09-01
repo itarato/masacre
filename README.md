@@ -4,6 +4,8 @@ Silly top-view 2D shooting game.
 
 ![Screenshot](./misc/screenshot.png)
 
+![Demo](./misc/demo.gif)
+
 Bugs:
 
 - global scope is getting fishy - try to replace it with something injectable
