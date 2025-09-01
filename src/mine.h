@@ -11,7 +11,7 @@ struct Mine : AttackDamage {
   const float circle_frame_radius{MINE_RADIUS};
   bool should_be_deleted{false};
 
-  Mine(Vector2 _pos) : AttackDamage(30.f), pos(_pos) {
+  Mine(Vector2 _pos) : AttackDamage(150.f), pos(_pos) {
   }
 
   void draw(Map const &map) const {

@@ -11,11 +11,9 @@
 
 struct GameScope {
   std::list<Bullet> enemy_bullets{};
-  ParticleManager particle_manager{};
 
   void reset() {
     enemy_bullets.clear();
-    particle_manager.reset();
   }
 
   void update(Map const &map, Player &player) {
@@ -28,13 +26,10 @@ struct GameScope {
         player.hurt(bullet);
       }
     }
-
-    particle_manager.update();
   }
 
   void draw(Map const &map) const {
     for (auto const &bullet : enemy_bullets) bullet.draw(map);
-    particle_manager.draw(map);
   }
 };
 

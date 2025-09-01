@@ -29,14 +29,15 @@ struct Enemy : AttackDamage {
   bool is_dead{false};
   TimedTask dying_lifetime{2.0};
   RepeatedTask shooting_task{2.0, 2.0};
-  ParticleManager particle_manager{};
+  std::shared_ptr<ParticleManager> particle_manager;
   float barrel_angle_rad{};
   float collision_avoidance_slowdown{1.f};
   RepeatedTask smoke_particle_scheduler{1.0f};
   float health;
   EnemyType ty;
 
-  explicit Enemy(Vector2 _pos, EnemyType _ty) : pos(_pos), move_target(_pos), ty(_ty) {
+  explicit Enemy(Vector2 _pos, EnemyType _ty, std::shared_ptr<ParticleManager> _particle_manager)
+      : pos(_pos), move_target(_pos), particle_manager(std::move(_particle_manager)), ty(_ty) {
     // The frame is derived from the image which is designed for turning.
     // Once the turning works, let's reduce the wheel size so we can use it to assume a frame size.
     switch (ty) {
@@ -77,11 +78,9 @@ struct Enemy : AttackDamage {
         PlaySound(asset_manager.sounds[ASSET_SOUND_ENEMY_SHOOT]);
       }
     }
-
-    particle_manager.update();
     shooting_task.update();
 
-    if (smoke_particle_scheduler.update()) particle_manager.particles.push_back(std::make_unique<SmokeParticle>(pos));
+    if (smoke_particle_scheduler.update()) particle_manager->particles.push_back(std::make_unique<SmokeParticle>(pos));
   }
 
   void draw(Map const &map, Vector2 const &player_pos) const {
@@ -91,8 +90,6 @@ struct Enemy : AttackDamage {
       draw_texture(wheel_texture(), Vector2Add(pos, map.world_offset), angle);
       draw_texture(barrel_texture(), Vector2Add(pos, map.world_offset), barrel_angle_rad * RAD2DEG);
     }
-
-    particle_manager.draw(map);
   }
 
   void hurt(AttackDamage const &damager) {
@@ -104,7 +101,7 @@ struct Enemy : AttackDamage {
       health = 0.f;
       is_dead = true;
       dying_lifetime.reset();
-      make_explosion(particle_manager, pos, ENEMY_EXPLOSION_SPEED, 32, GOLD);
+      make_explosion(*particle_manager, pos, ENEMY_EXPLOSION_SPEED, 32, GOLD);
     }
 
     smoke_particle_scheduler.resume();
@@ -224,11 +221,12 @@ struct EnemySpawner {
   float circle_frame_radius{30.f};
   float health{ENEMY_SPAWNER_MAX_HEALTH};
   RepeatedTask smoke_repeater{1.f};
-  ParticleManager particle_manager{};
+  std::shared_ptr<ParticleManager> particle_manager;
   Zapper zapper{};
 
-  EnemySpawner(Vector2 _pos, std::shared_ptr<SharedMusic> _zapper_music)
-      : pos(_pos), zapper_music(std::move(_zapper_music)) {
+  EnemySpawner(Vector2 _pos, std::shared_ptr<SharedMusic> _zapper_music,
+               std::shared_ptr<ParticleManager> _particle_manager)
+      : pos(_pos), zapper_music(std::move(_zapper_music)), particle_manager(std::move(_particle_manager)) {
     smoke_repeater.pause();
   }
 
@@ -240,7 +238,7 @@ struct EnemySpawner {
 
     if (!is_dead()) {
       if (spawn_repeater.update()) {
-        enemies.emplace_back(pos, rand() % 10 == 0 ? EnemyType::Large : EnemyType::Regular);
+        enemies.emplace_back(pos, rand() % 10 == 0 ? EnemyType::Large : EnemyType::Regular, particle_manager);
         // enemies.emplace_back(pos, EnemyType::Large);
       }
 
@@ -250,9 +248,8 @@ struct EnemySpawner {
       }
     }
 
-    particle_manager.update();
     if (smoke_repeater.update()) {
-      particle_manager.particles.push_back(std::make_unique<SmokeParticle>(pos, circle_frame_radius));
+      particle_manager->particles.push_back(std::make_unique<SmokeParticle>(pos, circle_frame_radius));
     }
   }
 
@@ -268,8 +265,6 @@ struct EnemySpawner {
     DrawRectangle(pos.x - circle_frame_radius + map.world_offset.x,
                   pos.y - circle_frame_radius - 8 + map.world_offset.y,
                   (circle_frame_radius * 2) * health / ENEMY_SPAWNER_MAX_HEALTH, 8.f, RED);
-
-    particle_manager.draw(map);
   }
 
   void hurt(AttackDamage const &damager) {
@@ -279,7 +274,7 @@ struct EnemySpawner {
     if (health <= 0.f) {
       health = 0.f;
       smoke_repeater.pause();
-      make_explosion(particle_manager, pos, ENEMY_EXPLOSION_SPEED, 32, GOLD);
+      make_explosion(*particle_manager, pos, ENEMY_EXPLOSION_SPEED, 32, GOLD);
     } else {
       smoke_repeater.resume();
       smoke_repeater.set_interval((health / ENEMY_SPAWNER_MAX_HEALTH) * 0.3f + 0.01f);

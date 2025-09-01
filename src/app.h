@@ -68,7 +68,8 @@ struct App {
     enemy_spawners.clear();
     particle_manager->reset();
 
-    for (int i = 0; i < ENEMY_SPAWNER_COUNT; i++) enemy_spawners.emplace_back(discoverable_random_spot(), zapper_music);
+    for (int i = 0; i < ENEMY_SPAWNER_COUNT; i++)
+      enemy_spawners.emplace_back(discoverable_random_spot(), zapper_music, particle_manager);
   }
 
   void run() {
@@ -174,7 +175,7 @@ struct App {
       for (auto& mine : player.mines) {
         if (CheckCollisionCircles(mine.pos, mine.circle_frame_radius, enemy.pos, enemy.circle_frame_radius)) {
           mine.kill();
-          make_explosion(game_scope.particle_manager, mine.pos, 300.f, 64, ColorAlpha(GRAY, 0.5f));
+          make_explosion(*particle_manager, mine.pos, 300.f, 64, ColorAlpha(GRAY, 0.5f));
 
           for (auto& _enemy : enemies) {
             if (CheckCollisionCircles(mine.pos, mine.blast_radius(), _enemy.pos, _enemy.circle_frame_radius)) {
