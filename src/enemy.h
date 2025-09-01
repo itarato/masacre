@@ -5,7 +5,6 @@
 
 #include "asset_manager.h"
 #include "common.h"
-#include "game_scope.h"
 #include "map.h"
 #include "particles.h"
 #include "path_finder.h"
@@ -58,7 +57,8 @@ struct Enemy : AttackDamage {
     smoke_particle_scheduler.pause();
   }
 
-  void update(Vector2 const &player_pos, Map const &map, PathFinder const &path_finder) {
+  void update(Vector2 const &player_pos, Map const &map, PathFinder const &path_finder,
+              std::list<Bullet> &enemy_bullets) {
     if (!is_dead) {
       if (Vector2Distance(pos, move_target) <= ENEMY_TARGET_REACH_THRESHOLD) {
         update_move_target(player_pos, map, path_finder);
@@ -73,7 +73,7 @@ struct Enemy : AttackDamage {
         float aim_jitter_rad = ((rand() % 31) - 15) * DEG2RAD;
         Vector2 bullet_v{cosf(barrel_angle_rad + aim_jitter_rad) * BULLET_SPEED * GetFrameTime(),
                          sinf(barrel_angle_rad + aim_jitter_rad) * BULLET_SPEED * GetFrameTime()};
-        game_scope.enemy_bullets.emplace_back(pos, bullet_v, BULLET_SINGLE_ATTACK_DAMAGE);
+        enemy_bullets.emplace_back(pos, bullet_v, BULLET_SINGLE_ATTACK_DAMAGE);
 
         PlaySound(asset_manager.sounds[ASSET_SOUND_ENEMY_SHOOT]);
       }

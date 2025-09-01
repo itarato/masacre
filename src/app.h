@@ -34,6 +34,7 @@ struct App {
   Minimap minimap{};
   std::list<EnemySpawner> enemy_spawners{};
   std::shared_ptr<SharedMusic> zapper_music{};
+  std::list<Bullet> enemy_bullets{};
 
   App() : particle_manager(std::make_shared<ParticleManager>()), player(particle_manager) {
   }
@@ -64,9 +65,9 @@ struct App {
     player.reset(path_finder);
     enemies.clear();
     collectibles.clear();
-    game_scope.reset();
     enemy_spawners.clear();
     particle_manager->reset();
+    enemy_bullets.clear();
 
     for (int i = 0; i < ENEMY_SPAWNER_COUNT; i++)
       enemy_spawners.emplace_back(discoverable_random_spot(), zapper_music, particle_manager);
@@ -94,17 +95,16 @@ struct App {
     player.update(map);
 
     for (auto& enemy_spawner : enemy_spawners) enemy_spawner.update(enemies, player);
-    for (auto& enemy : enemies) enemy.update(*player.pos, map, path_finder);
+    for (auto& enemy : enemies) enemy.update(*player.pos, map, path_finder, enemy_bullets);
 
     map.update(*player.pos);
     zapper_music->update();
-
-    game_scope.update(map, player);
 
     update_enemy_collision_checks();
     update_enemy_spawner_collision_checks();
     update_collectible_collisions();
     update_enemy_jam_control();
+    update_enemy_bullet_collisions();
 
     // Delete disposables.
     std::erase_if(enemies, [](const auto& e) { return e.should_be_deleted(); });
@@ -128,12 +128,12 @@ struct App {
     for (auto const& enemy_spawner : enemy_spawners) enemy_spawner.draw(map);
     for (auto const& enemy : enemies) enemy.draw(map, *player.pos);
     for (auto const& collectible : collectibles) collectible.draw(map);
-    game_scope.draw(map);
     player.draw(map);
     perf_chart.draw();
     path_finder.draw(map);
     minimap.draw(map, player, enemies);
     particle_manager->draw(map);
+    for (auto const& bullet : enemy_bullets) bullet.draw(map);
     // draw_debug_path_finding(*player.pos);
   }
 
@@ -240,6 +240,18 @@ struct App {
             enemy_lhs.collision_avoidance_slowdown *= 0.9f;
           }
         }
+      }
+    }
+  }
+
+  void update_enemy_bullet_collisions() {
+    for (auto& bullet : enemy_bullets) bullet.update(map);
+    std::erase_if(enemy_bullets, [](auto e) { return e.should_be_deleted; });
+
+    for (auto& bullet : enemy_bullets) {
+      if (CheckCollisionPointCircle(bullet.pos, *player.pos, player.circle_frame_radius)) {
+        bullet.kill();
+        player.hurt(bullet);
       }
     }
   }
