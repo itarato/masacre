@@ -41,6 +41,16 @@ struct UIElement {
 struct UIElementAndDeletable : UIElement, Deletable {};
 
 struct AttackDamage {
+  [[nodiscard]] virtual float get_attack_damage() const {
+    return attack_damage;
+  }
+
+  AttackDamage() {
+  }
+  explicit AttackDamage(float _attack_damage) : attack_damage(_attack_damage) {
+  }
+
+ private:
   float attack_damage{0.f};
 };
 
@@ -61,8 +71,12 @@ inline Vector2 int_vector2_to_vector2(IntVector2 p) {
   return Vector2{static_cast<float>(p.x * CELL_DISTANCE), static_cast<float>(p.y * CELL_DISTANCE)};
 }
 
+float randf_balanced(float v, float jitter) {
+  return v + randf() * jitter - (jitter / 2.f);
+}
+
 Vector2 randomize_pos(Vector2 const &p, float jitter) {
-  return Vector2{p.x + randf() * jitter - (jitter / 2.f), p.y + randf() * jitter - (jitter / 2.f)};
+  return Vector2{randf_balanced(p.x, jitter), randf_balanced(p.y, jitter)};
 }
 
 struct PFCell {
@@ -240,3 +254,29 @@ float fps_independent_multiplier() {
 void fps_independent_multiply(float *v, float mul) {
   *v *= powf(mul, fps_independent_multiplier());
 }
+
+struct SharedMusic {
+  Music *music;
+  int requests{0};
+  int previous_requests{0};
+
+  SharedMusic(Music *_music) : music(_music) {
+  }
+
+  void request() {
+    requests++;
+  }
+
+  void update() {
+    UpdateMusicStream(*music);
+
+    if (requests > 0 && previous_requests == 0) {
+      PlayMusicStream(*music);
+    } else if (requests == 0 && previous_requests > 0) {
+      StopMusicStream(*music);
+    }
+
+    previous_requests = requests;
+    requests = 0;
+  }
+};

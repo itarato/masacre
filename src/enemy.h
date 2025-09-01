@@ -10,6 +10,7 @@
 #include "particles.h"
 #include "path_finder.h"
 #include "raylib.h"
+#include "zapper.h"
 
 constexpr float ENEMY_SPEED = 200.f;
 constexpr float ENEMY_TARGET_REACH_THRESHOLD = 1.f;
@@ -17,7 +18,7 @@ constexpr float ENEMY_EXPLOSION_SPEED = 200.f;
 constexpr float ENEMY_PLAYER_MIN_CHASE_DISTANCE = 100.f;
 constexpr float ENEMY_SPAWNER_MAX_HEALTH = 800.f;
 
-struct Enemy {
+struct Enemy : AttackDamage {
   u_int64_t object_id;
   Vector2 pos;
   Vector2 move_target{};
@@ -80,10 +81,10 @@ struct Enemy {
     particle_manager.draw(map);
   }
 
-  void hurt(AttackDamage const &thing) {
+  void hurt(AttackDamage const &damager) {
     if (is_dead) return;
 
-    health -= thing.attack_damage;
+    health -= damager.get_attack_damage();
 
     if (health <= 0.f) {
       health = 0.f;
@@ -97,7 +98,7 @@ struct Enemy {
     return is_dead && dying_lifetime.is_completed();
   }
 
-  [[nodiscard]] float attack_damage() const {
+  [[nodiscard]] float get_attack_damage() const override {
     if (is_dead) return 0.f;
 
     return 10.f * GetFrameTime();
@@ -140,20 +141,33 @@ struct Enemy {
 };
 
 struct EnemySpawner {
-  Vector2 pos{};
+  Vector2 pos;
+  std::shared_ptr<SharedMusic> zapper_music;
   RepeatedTask spawn_repeater{5.0};
   float circle_frame_radius{30.f};
   float health{ENEMY_SPAWNER_MAX_HEALTH};
   RepeatedTask smoke_repeater{1.f};
   ParticleManager particle_manager{};
+  Zapper zapper{};
 
-  EnemySpawner(Vector2 _pos) : pos(_pos) {
+  EnemySpawner(Vector2 _pos, std::shared_ptr<SharedMusic> _zapper_music)
+      : pos(_pos), zapper_music(std::move(_zapper_music)) {
     smoke_repeater.pause();
   }
 
-  void update(std::list<Enemy> &enemies) {
+  void update(std::list<Enemy> &enemies, Player &player) {
+    const bool player_too_close = Vector2Distance(pos, *player.pos) <= 256.f;
+    zapper.visible = player_too_close;
+    zapper.start = pos;
+    zapper.end = *player.pos;
+
     if (!is_dead()) {
       if (spawn_repeater.update()) enemies.emplace_back(pos);
+
+      if (player_too_close) {
+        zapper_music->request();
+        player.hurt(zapper);
+      }
     }
 
     particle_manager.update();
@@ -163,6 +177,10 @@ struct EnemySpawner {
   }
 
   void draw(Map const &map) const {
+    if (!is_dead()) {
+      zapper.draw(map);
+    }
+
     draw_texture(asset_manager.textures[ASSET_ENEMY_SPAWNER_TEXTURE], Vector2Add(pos, map.world_offset), 0.f);
     DrawRectangle(pos.x - circle_frame_radius + map.world_offset.x - 2.f,
                   pos.y - circle_frame_radius - 8 + map.world_offset.y - 2.f, (circle_frame_radius * 2) + 4.f,
@@ -174,8 +192,8 @@ struct EnemySpawner {
     particle_manager.draw(map);
   }
 
-  void hurt(Bullet const &bullet) {
-    health -= bullet.attack_damage;
+  void hurt(AttackDamage const &damager) {
+    health -= damager.get_attack_damage();
     if (health <= 0.f) {
       health = 0.f;
       smoke_repeater.pause();

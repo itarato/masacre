@@ -25,7 +25,7 @@ struct GameScope {
     for (auto &bullet : enemy_bullets) {
       if (CheckCollisionPointCircle(bullet.pos, *player.pos, player.circle_frame_radius)) {
         bullet.kill();
-        player.hurt(bullet.attack_damage);
+        player.hurt(bullet);
       }
     }
 

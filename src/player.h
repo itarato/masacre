@@ -296,8 +296,8 @@ struct Player {
     return Vector2Add(*pos, world_offset);
   }
 
-  void hurt(float hurt_val) {
-    health -= hurt_val;
+  void hurt(AttackDamage const &thing) {
+    health -= thing.get_attack_damage();
 
     if (health <= 0) {
       health = 0;

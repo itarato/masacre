@@ -27,10 +27,13 @@ constexpr int ASSET_SOUND_PLAYER_SHOOT = 0;
 constexpr int ASSET_SOUND_ENEMY_SHOOT = 1;
 constexpr int ASSET_SOUND_PICKUP = 2;
 
+constexpr int ASSET_MUSIC_ZAPPER = 0;
+
 struct AssetManager {
   std::unordered_map<int, Texture2D> textures{};
   std::unordered_map<int, Image> images{};
   std::unordered_map<int, Sound> sounds{};
+  std::unordered_map<int, Music> musics{};
 
   ~AssetManager() {
     for (auto const& kv : textures) UnloadTexture(kv.second);
@@ -64,6 +67,11 @@ struct AssetManager {
     SetSoundVolume(sounds[ASSET_SOUND_ENEMY_SHOOT], 0.4f);
     sounds[ASSET_SOUND_PICKUP] = LoadSound("./assets/sounds/pickup.mp3");
     SetSoundVolume(sounds[ASSET_SOUND_PICKUP], 0.9f);
+
+    musics[ASSET_MUSIC_ZAPPER] = LoadMusicStream("./assets/sounds/zapper.mp3");
+    SetMusicVolume(musics[ASSET_MUSIC_ZAPPER], 1.0f);
+
+    TraceLog(LOG_INFO, IsMusicValid(musics[ASSET_MUSIC_ZAPPER]) ? "VALID" : "NOT VALID");
   }
 };
 

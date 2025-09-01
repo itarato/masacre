@@ -33,6 +33,7 @@ struct App {
   PathFinder path_finder{};
   Minimap minimap{};
   std::list<EnemySpawner> enemy_spawners{};
+  std::shared_ptr<SharedMusic> zapper_music{};
 
   App() : particle_manager(std::make_shared<ParticleManager>()), player(particle_manager) {
   }
@@ -51,6 +52,10 @@ struct App {
     map.init();
     path_finder.init(map);
 
+    std::shared_ptr<SharedMusic> _zapper_music{
+        std::make_shared<SharedMusic>(&asset_manager.musics[ASSET_MUSIC_ZAPPER])};
+    zapper_music.swap(_zapper_music);
+
     reset();
   }
 
@@ -63,7 +68,7 @@ struct App {
     enemy_spawners.clear();
     particle_manager->reset();
 
-    for (int i = 0; i < ENEMY_SPAWNER_COUNT; i++) enemy_spawners.emplace_back(discoverable_random_spot());
+    for (int i = 0; i < ENEMY_SPAWNER_COUNT; i++) enemy_spawners.emplace_back(discoverable_random_spot(), zapper_music);
   }
 
   void run() {
@@ -87,10 +92,11 @@ struct App {
     particle_manager->update();
     player.update(map);
 
-    for (auto& enemy_spawner : enemy_spawners) enemy_spawner.update(enemies);
+    for (auto& enemy_spawner : enemy_spawners) enemy_spawner.update(enemies, player);
     for (auto& enemy : enemies) enemy.update(*player.pos, map, path_finder);
 
     map.update(*player.pos);
+    zapper_music->update();
 
     game_scope.update(map, player);
 
@@ -179,7 +185,7 @@ struct App {
       }
 
       if (CheckCollisionCircles(*player.pos, player.circle_frame_radius, enemy.pos, enemy.circle_frame_radius)) {
-        player.hurt(enemy.attack_damage());
+        player.hurt(enemy);
       }
     }
   }
