@@ -37,11 +37,14 @@ struct Player {
   float health{};
   int kill_count{};
   int mine_count{};
-  ParticleManager particle_manager{};
+  std::shared_ptr<ParticleManager> particle_manager;
   RepeatedTask smoke_particle_scheduler{0.08};
   RepeatedTask wheel_trace_particle_scheduler{0.05};
   RepeatedTask rapid_fire_scheduler{0.05};
   TimedRepeatedTask hurt_particle_timed_repeater{0.02};
+
+  Player(std::shared_ptr<ParticleManager> _particle_manager) : particle_manager(std::move(_particle_manager)) {
+  }
 
   void init() {
     circle_frame_radius = asset_manager.textures[ASSET_PLAYER_TEXTURE].width / 2.f;
@@ -58,7 +61,7 @@ struct Player {
     mine_count = PLAYER_STARTER_MINE_COUNT;
     health = PLAYER_MAX_HEALTH;
     kill_count = 0;
-    particle_manager.reset();
+    particle_manager->reset();
     mines.clear();
   }
 
@@ -75,7 +78,7 @@ struct Player {
     std::erase_if(mines, [](auto e) { return e.should_be_deleted; });
     for (auto &bullet : bullets) bullet.update(map);
 
-    particle_manager.update();
+    particle_manager->update();
 
     if (health >= PLAYER_MAX_HEALTH * 0.95) {
       smoke_particle_scheduler.pause();
@@ -89,7 +92,7 @@ struct Player {
 
     smoke_particle_scheduler.update();
 
-    if (smoke_particle_scheduler.did_tick) particle_manager.particles.push_back(std::make_unique<SmokeParticle>(*pos));
+    if (smoke_particle_scheduler.did_tick) particle_manager->particles.push_back(std::make_unique<SmokeParticle>(*pos));
   }
 
   void draw(Map const &map) const {
@@ -138,7 +141,7 @@ struct Player {
     DrawText(TextFormat("%d FPS", GetFPS()), GetScreenWidth() - 116, GetScreenHeight() - 28, 20, WHITE);
 
     // Draw particles.
-    particle_manager.draw(map);
+    particle_manager->draw(map);
   }
 
   void update_rotation() {
@@ -260,7 +263,7 @@ struct Player {
       wheel_trace_particle_scheduler.update();
 
       if (wheel_trace_particle_scheduler.did_tick) {
-        particle_manager.particles.emplace_back(std::make_unique<TraceParticle>(*pos, angle + 90));
+        particle_manager->particles.emplace_back(std::make_unique<TraceParticle>(*pos, angle + 90));
       }
     }
   }
@@ -285,7 +288,7 @@ struct Player {
           particle->color = RED;
           break;
       }
-      particle_manager.particles.push_back(std::move(particle));
+      particle_manager->particles.push_back(std::move(particle));
     }
   }
 

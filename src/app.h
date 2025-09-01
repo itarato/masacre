@@ -11,6 +11,7 @@
 #include "intrinsic.h"
 #include "map.h"
 #include "minimap.h"
+#include "particles.h"
 #include "path_finder.h"
 #include "player.h"
 #include "raylib.h"
@@ -23,7 +24,8 @@ constexpr int ENEMY_JAM_CONTROL_CLOSE = CELL_DISTANCE;
 constexpr float ENEMY_JAM_CONTROL_TOO_CLOSE = CELL_DISTANCE / 2.f;
 
 struct App {
-  Player player{};
+  std::shared_ptr<ParticleManager> particle_manager;
+  Player player;
   Map map{};
   std::list<Enemy> enemies{};
   std::list<Collectible> collectibles{};
@@ -31,6 +33,9 @@ struct App {
   PathFinder path_finder{};
   Minimap minimap{};
   std::list<EnemySpawner> enemy_spawners{};
+
+  App() : particle_manager(std::make_shared<ParticleManager>()), player(particle_manager) {
+  }
 
   void init() {
     srand(time(nullptr));
@@ -56,6 +61,7 @@ struct App {
     collectibles.clear();
     game_scope.reset();
     enemy_spawners.clear();
+    particle_manager->reset();
 
     for (int i = 0; i < ENEMY_SPAWNER_COUNT; i++) enemy_spawners.emplace_back(discoverable_random_spot());
   }
@@ -78,6 +84,7 @@ struct App {
   void update() {
     if (IsKeyPressed(KEY_R) || IsGamepadButtonPressed(0, 5)) reset();
 
+    particle_manager->update();
     player.update(map);
 
     for (auto& enemy_spawner : enemy_spawners) enemy_spawner.update(enemies);
@@ -119,6 +126,7 @@ struct App {
     perf_chart.draw();
     path_finder.draw(map);
     minimap.draw(map, player, enemies);
+    particle_manager->draw(map);
     // draw_debug_path_finding(*player.pos);
   }
 

@@ -15,7 +15,7 @@ constexpr float ENEMY_SPEED = 200.f;
 constexpr float ENEMY_TARGET_REACH_THRESHOLD = 1.f;
 constexpr float ENEMY_EXPLOSION_SPEED = 200.f;
 constexpr float ENEMY_PLAYER_MIN_CHASE_DISTANCE = 100.f;
-constexpr float ENEMY_SPAWNER_MAX_HEALTH = 200.f;
+constexpr float ENEMY_SPAWNER_MAX_HEALTH = 800.f;
 
 struct Enemy {
   u_int64_t object_id;

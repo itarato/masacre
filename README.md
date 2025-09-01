@@ -15,6 +15,7 @@ Todo:
 - player died message
 - player deploying landmines
 - enemy has health + rapid fire not being instant kill (but have smoke)
+- enemy spawner zapping when close
 
 Idea:
 
