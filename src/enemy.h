@@ -193,6 +193,8 @@ struct EnemySpawner {
   }
 
   void hurt(AttackDamage const &damager) {
+    if (is_dead()) return;
+
     health -= damager.get_attack_damage();
     if (health <= 0.f) {
       health = 0.f;
