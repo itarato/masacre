@@ -4,7 +4,7 @@ Silly top-view 2D shooting game.
 
 ![Screenshot](./misc/screenshot.png)
 
-![Demo](./misc/demo.gif)
+![Demo](./misc/demo.webm)
 
 Bugs:
 
