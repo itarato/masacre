@@ -32,7 +32,7 @@ struct Enemy : AttackDamage {
   ParticleManager particle_manager{};
   float barrel_angle_rad{};
   float collision_avoidance_slowdown{1.f};
-  RepeatedTask smoke_particle_scheduler{0.1};
+  RepeatedTask smoke_particle_scheduler{1.0f};
   float health;
   EnemyType ty;
 
@@ -42,18 +42,19 @@ struct Enemy : AttackDamage {
     switch (ty) {
       case EnemyType::Regular:
         circle_frame_radius = wheel_texture().width / 3.f;
-        health = 30.f;
         break;
       case EnemyType::Large:
         circle_frame_radius = wheel_texture().width / 2.f;
-        health = 300.f;
         break;
       default:
         TraceLog(LOG_ERROR, "Unexpected enemy type");
         exit(EXIT_FAILURE);
     }
 
+    health = max_health();
     object_id = global_object_id++;
+
+    smoke_particle_scheduler.pause();
   }
 
   void update(Vector2 const &player_pos, Map const &map, PathFinder const &path_finder) {
@@ -75,13 +76,12 @@ struct Enemy : AttackDamage {
 
         PlaySound(asset_manager.sounds[ASSET_SOUND_ENEMY_SHOOT]);
       }
-    } else {
-      smoke_particle_scheduler.update();
-      if (smoke_particle_scheduler.did_tick) particle_manager.particles.push_back(std::make_unique<SmokeParticle>(pos));
     }
 
     particle_manager.update();
     shooting_task.update();
+
+    if (smoke_particle_scheduler.update()) particle_manager.particles.push_back(std::make_unique<SmokeParticle>(pos));
   }
 
   void draw(Map const &map, Vector2 const &player_pos) const {
@@ -106,6 +106,9 @@ struct Enemy : AttackDamage {
       dying_lifetime.reset();
       make_explosion(particle_manager, pos, ENEMY_EXPLOSION_SPEED, 32, GOLD);
     }
+
+    smoke_particle_scheduler.resume();
+    smoke_particle_scheduler.set_interval((health / max_health()) * 0.3f + 0.01f);
   }
 
   [[nodiscard]] bool should_be_deleted() const {
@@ -200,6 +203,18 @@ struct Enemy : AttackDamage {
         exit(EXIT_FAILURE);
     }
   }
+
+  float max_health() const {
+    switch (ty) {
+      case EnemyType::Regular:
+        return 30.f;
+      case EnemyType::Large:
+        return 300.f;
+      default:
+        TraceLog(LOG_ERROR, "Unexpected enemy type");
+        exit(EXIT_FAILURE);
+    }
+  }
 };
 
 struct EnemySpawner {
@@ -211,7 +226,6 @@ struct EnemySpawner {
   RepeatedTask smoke_repeater{1.f};
   ParticleManager particle_manager{};
   Zapper zapper{};
-  int enemy_counter{};
 
   EnemySpawner(Vector2 _pos, std::shared_ptr<SharedMusic> _zapper_music)
       : pos(_pos), zapper_music(std::move(_zapper_music)) {
@@ -219,17 +233,15 @@ struct EnemySpawner {
   }
 
   void update(std::list<Enemy> &enemies, Player &player) {
-    const bool player_too_close = Vector2Distance(pos, *player.pos) <= 256.f;
+    const bool player_too_close = Vector2Distance(pos, *player.pos) <= 196.f;
     zapper.visible = player_too_close;
     zapper.start = pos;
     zapper.end = *player.pos;
 
     if (!is_dead()) {
       if (spawn_repeater.update()) {
-        // enemies.emplace_back(pos, enemy_counter % 10 == 9 ? EnemyType::Large : EnemyType::Regular);
-        enemies.emplace_back(pos, EnemyType::Large);
-
-        enemy_counter++;
+        enemies.emplace_back(pos, rand() % 10 == 0 ? EnemyType::Large : EnemyType::Regular);
+        // enemies.emplace_back(pos, EnemyType::Large);
       }
 
       if (player_too_close) {
