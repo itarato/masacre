@@ -18,6 +18,8 @@ constexpr float ENEMY_EXPLOSION_SPEED = 200.f;
 constexpr float ENEMY_PLAYER_MIN_CHASE_DISTANCE = 100.f;
 constexpr float ENEMY_SPAWNER_MAX_HEALTH = 800.f;
 
+enum class EnemyType { Regular, Large };
+
 struct Enemy : AttackDamage {
   u_int64_t object_id;
   Vector2 pos;
@@ -31,12 +33,25 @@ struct Enemy : AttackDamage {
   float barrel_angle_rad{};
   float collision_avoidance_slowdown{1.f};
   RepeatedTask smoke_particle_scheduler{0.1};
-  float health{30.f};
+  float health;
+  EnemyType ty;
 
-  explicit Enemy(Vector2 _pos) : pos(_pos), move_target(_pos) {
+  explicit Enemy(Vector2 _pos, EnemyType _ty) : pos(_pos), move_target(_pos), ty(_ty) {
     // The frame is derived from the image which is designed for turning.
     // Once the turning works, let's reduce the wheel size so we can use it to assume a frame size.
-    circle_frame_radius = asset_manager.textures[ASSET_ENEMY_WHEEL_TEXTURE].width / 3.f;
+    switch (ty) {
+      case EnemyType::Regular:
+        circle_frame_radius = wheel_texture().width / 3.f;
+        health = 30.f;
+        break;
+      case EnemyType::Large:
+        circle_frame_radius = wheel_texture().width / 2.f;
+        health = 300.f;
+        break;
+      default:
+        TraceLog(LOG_ERROR, "Unexpected enemy type");
+        exit(EXIT_FAILURE);
+    }
 
     object_id = global_object_id++;
   }
@@ -71,11 +86,10 @@ struct Enemy : AttackDamage {
 
   void draw(Map const &map, Vector2 const &player_pos) const {
     if (is_dead) {
-      draw_texture(asset_manager.textures[ASSET_ENEMY_BROKEN_TEXTURE], Vector2Add(pos, map.world_offset), angle);
+      draw_texture(broken_texture(), Vector2Add(pos, map.world_offset), angle);
     } else {
-      draw_texture(asset_manager.textures[ASSET_ENEMY_WHEEL_TEXTURE], Vector2Add(pos, map.world_offset), angle);
-      draw_texture(asset_manager.textures[ASSET_ENEMY_BARREL_TEXTURE], Vector2Add(pos, map.world_offset),
-                   barrel_angle_rad * RAD2DEG);
+      draw_texture(wheel_texture(), Vector2Add(pos, map.world_offset), angle);
+      draw_texture(barrel_texture(), Vector2Add(pos, map.world_offset), barrel_angle_rad * RAD2DEG);
     }
 
     particle_manager.draw(map);
@@ -105,6 +119,42 @@ struct Enemy : AttackDamage {
   }
 
  private:
+  Texture2D &wheel_texture() const {
+    switch (ty) {
+      case EnemyType::Regular:
+        return asset_manager.textures[ASSET_ENEMY_WHEEL_TEXTURE];
+      case EnemyType::Large:
+        return asset_manager.textures[ASSET_ENEMY_LARGE_WHEEL_TEXTURE];
+      default:
+        TraceLog(LOG_ERROR, "Unexpected enemy type");
+        exit(EXIT_FAILURE);
+    }
+  }
+
+  Texture2D &barrel_texture() const {
+    switch (ty) {
+      case EnemyType::Regular:
+        return asset_manager.textures[ASSET_ENEMY_BARREL_TEXTURE];
+      case EnemyType::Large:
+        return asset_manager.textures[ASSET_ENEMY_LARGE_BARREL_TEXTURE];
+      default:
+        TraceLog(LOG_ERROR, "Unexpected enemy type");
+        exit(EXIT_FAILURE);
+    }
+  }
+
+  Texture2D &broken_texture() const {
+    switch (ty) {
+      case EnemyType::Regular:
+        return asset_manager.textures[ASSET_ENEMY_BROKEN_TEXTURE];
+      case EnemyType::Large:
+        return asset_manager.textures[ASSET_ENEMY_LARGE_BROKEN_TEXTURE];
+      default:
+        TraceLog(LOG_ERROR, "Unexpected enemy type");
+        exit(EXIT_FAILURE);
+    }
+  }
+
   void update_move_target(Vector2 const &player_pos, Map const &map, PathFinder const &path_finder) {
     if (Vector2Distance(pos, player_pos) <= ENEMY_PLAYER_MIN_CHASE_DISTANCE) return;
 
@@ -125,7 +175,7 @@ struct Enemy : AttackDamage {
 
     Vector2 delta = Vector2Subtract(pos, move_target);
     float total_dist = Vector2Distance(pos, move_target);
-    float move_dist = ENEMY_SPEED * GetFrameTime() * collision_avoidance_slowdown;
+    float move_dist = speed() * GetFrameTime() * collision_avoidance_slowdown;
 
     Vector2 old_pos{pos};
 
@@ -138,6 +188,18 @@ struct Enemy : AttackDamage {
 
     angle = abs_angle_of_points(old_pos, pos) * RAD2DEG;
   }
+
+  float speed() const {
+    switch (ty) {
+      case EnemyType::Regular:
+        return 200.f;
+      case EnemyType::Large:
+        return 100.f;
+      default:
+        TraceLog(LOG_ERROR, "Unexpected enemy type");
+        exit(EXIT_FAILURE);
+    }
+  }
 };
 
 struct EnemySpawner {
@@ -149,6 +211,7 @@ struct EnemySpawner {
   RepeatedTask smoke_repeater{1.f};
   ParticleManager particle_manager{};
   Zapper zapper{};
+  int enemy_counter{};
 
   EnemySpawner(Vector2 _pos, std::shared_ptr<SharedMusic> _zapper_music)
       : pos(_pos), zapper_music(std::move(_zapper_music)) {
@@ -162,7 +225,12 @@ struct EnemySpawner {
     zapper.end = *player.pos;
 
     if (!is_dead()) {
-      if (spawn_repeater.update()) enemies.emplace_back(pos);
+      if (spawn_repeater.update()) {
+        // enemies.emplace_back(pos, enemy_counter % 10 == 9 ? EnemyType::Large : EnemyType::Regular);
+        enemies.emplace_back(pos, EnemyType::Large);
+
+        enemy_counter++;
+      }
 
       if (player_too_close) {
         zapper_music->request();
