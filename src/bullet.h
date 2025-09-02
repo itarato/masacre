@@ -5,7 +5,7 @@
 #include "raylib.h"
 #include "raymath.h"
 
-struct Bullet : AttackDamage {
+struct Bullet final : AttackDamage {
   Vector2 pos{};
   Vector2 v{};
   bool should_be_deleted{false};

@@ -21,7 +21,7 @@ constexpr float ENEMY_SPAWNER_MAX_HEALTH = 800.f;
 
 enum class EnemyType { Regular, Large };
 
-struct Enemy : AttackDamage {
+struct Enemy final : AttackDamage {
   u_int64_t object_id;
   Vector2 pos;
   Vector2 move_target{};

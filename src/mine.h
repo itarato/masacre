@@ -6,7 +6,7 @@
 
 constexpr float MINE_RADIUS = 10.f;
 
-struct Mine : AttackDamage {
+struct Mine final : AttackDamage {
   Vector2 pos;
   const float circle_frame_radius{MINE_RADIUS};
   bool should_be_deleted{false};
